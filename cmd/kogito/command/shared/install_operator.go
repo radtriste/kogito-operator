@@ -25,7 +25,7 @@ import (
 	"github.com/kiegroup/kogito-cloud-operator/pkg/client"
 	"github.com/kiegroup/kogito-cloud-operator/pkg/client/kubernetes"
 	"github.com/kiegroup/kogito-cloud-operator/pkg/client/meta"
-	infra "github.com/kiegroup/kogito-cloud-operator/pkg/infrastructure"
+	infrastructure "github.com/kiegroup/kogito-cloud-operator/pkg/infrastructure"
 	"github.com/kiegroup/kogito-cloud-operator/version"
 
 	apps "k8s.io/api/apps/v1"
@@ -64,7 +64,7 @@ func MustInstallOperatorIfNotExists(namespace string, operatorImage string, cli 
 		operatorImage = DefaultOperatorImageNameTag
 	}
 
-	if exists, err := infra.CheckKogitoOperatorExists(cli, namespace); err != nil {
+	if exists, err := infrastructure.CheckKogitoOperatorExists(cli, namespace); err != nil {
 		return false, err
 	} else if exists {
 		if !silence {

@@ -121,7 +121,7 @@ func (data *Data) httpRequestWithPathOnServiceIsSuccessfulWithinMinutes(httpMeth
 	return waitForHttpRequest(httpMethod, routeUri, path, nil, timeoutInMin)
 }
 
-func (data *Data) callHttpRequestOnServiceWithPathAndBody(httpMethod, serviceName, path, bodyFormat, bodyContent string){
+func (data *Data) callHttpRequestOnServiceWithPathAndBody(httpMethod, serviceName, path, bodyFormat, bodyContent string) error {
 	// TODO
 	return nil
 }
