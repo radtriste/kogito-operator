@@ -17,11 +17,11 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"time"
 	"path/filepath"
-	
+	"time"
+
 	"github.com/DATA-DOG/godog"
-	
+
 	"github.com/kiegroup/kogito-cloud-operator/pkg/logger"
 )
 
@@ -34,23 +34,27 @@ type Data struct {
 
 func (data *Data) setUp(interface{}) {
 	data.StartTime = time.Now()
-	
+
 	// Define and create namespace
 	rand.Seed(time.Now().UnixNano())
 	ns := "cucumber-" + randSeq(4)
-	if err := CreateNamespace(ns); err != nil { panic(err) }
-	
+	if err := CreateNamespace(ns); err != nil {
+		panic(err)
+	}
+
 	data.Namespace = ns
 }
 
 func (data *Data) tearDown(fn interface{}, err error) {
-	if e := DeleteNamespace(data.Namespace); e != nil { panic(e) }
-	
+	if e := DeleteNamespace(data.Namespace); e != nil {
+		panic(e)
+	}
+
 	endTime := time.Now()
 	duration := endTime.Sub(data.StartTime)
 	log.Infof("Scenario duration = %s", duration.String())
-	
-	if(err != nil){
+
+	if err != nil {
 		panic(err)
 	}
 }
@@ -64,12 +68,12 @@ func (data *Data) kogitoOperatorIsDeployed() error {
 		if err := DeployOperatorFromYaml(data.Namespace); err != nil {
 			return fmt.Errorf("Error while deploying operator: %v", err)
 		}
-		
+
 		if err := WaitForOperatorRunning(data.Namespace); err != nil {
 			return fmt.Errorf("Error while checking operator running: %v", err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -111,12 +115,12 @@ func (data *Data) httpRequestWithPathOnServiceIsSuccessfulWithinMinutes(httpMeth
 		return fmt.Errorf("Route %s does not exist in namespace %s after %d minutes: %v", serviceName, data.Namespace, timeoutInMin, err)
 	}
 	routeUri, err := GetRouteUri(data.Namespace, serviceName)
-	if err != nil { 
-		return fmt.Errorf("Error retrieving URI for route %s in namespace %s: %v", serviceName, data.Namespace, err) 
-	} else if routeUri == "" { 
-		return fmt.Errorf("No URI found for route name %s in namespace %s: %v", serviceName, data.Namespace, err) 
+	if err != nil {
+		return fmt.Errorf("Error retrieving URI for route %s in namespace %s: %v", serviceName, data.Namespace, err)
+	} else if routeUri == "" {
+		return fmt.Errorf("No URI found for route name %s in namespace %s: %v", serviceName, data.Namespace, err)
 	}
-	
+
 	log.Infof("Got route %s\n", routeUri)
 	return waitForHttpRequest(httpMethod, routeUri, path, nil, timeoutInMin)
 }
@@ -130,26 +134,25 @@ func FeatureContext(s *godog.Suite) {
 	data := &Data{}
 	// Create kube client
 	initKubeClient()
-	
+
 	s.BeforeScenario(data.setUp)
 	s.AfterScenario(data.tearDown)
-	
+
 	// Operator steps
 	s.Step(`^Kogito Operator is deployed$`, data.kogitoOperatorIsDeployed)
 	s.Step(`^Kogito Operator is deployed with dependencies$`, data.kogitoOperatorIsDeployed)
-	
+
 	// Deploy steps
 	s.Step(`^Deploy quarkus example service "([^"]*)" with native "([^"]*)"$`, data.deployQuarkusExampleServiceWithNative)
 	s.Step(`^Deploy quarkus example service "([^"]*)" with persistence enabled and native "([^"]*)"$`, data.deployQuarkusExampleServiceWithNative)
 	s.Step(`^Deploy spring boot example service "([^"]*)"$`, data.deploySpringBootExampleService)
-	
+
 	// Build steps
 	s.Step(`^Build "([^"]*)" is complete after (\d+) minutes$`, data.buildIsCompleteAfterMinutes)
-	
+
 	// DeploymentConfig steps
 	s.Step(`^DeploymentConfig "([^"]*)" has (\d+) pod running within (\d+) minutes$`, data.deploymentConfigHasPodRunningWithinMinutes)
-	
+
 	// HTTP call steps
 	s.Step(`^Call HTTP "([^"]*)" request with path "([^"]*)" on service "([^"]*)" is successful within (\d+) minutes$`, data.httpRequestWithPathOnServiceIsSuccessfulWithinMinutes)
 }
-
