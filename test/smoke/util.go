@@ -52,27 +52,28 @@ func readFromUri(uri string) (string, error) {
 	return string(data), nil
 }
 
-func waitFor(display string, timeout time.Duration, condition func() (bool,error)) error {
+func waitFor(display string, timeout time.Duration, condition func() (bool, error)) error {
 	log.Infof("Wait %s for %s", timeout.String(), display)
-	interval := timeout / 60
-	
-	running := false 
-	var err error
-	for i := 1; i <= 60; i++ {
-		running, err = condition()
-		if err != nil {
-			return err
+
+	timeoutChan := time.After(timeout)
+	tick := time.NewTicker(timeout / 60)
+	defer tick.Stop()
+
+	for {
+		select {
+		case <-timeoutChan:
+			return fmt.Errorf("Timeout waiting for %s", display)
+		case <-tick.C:
+			running, err := condition()
+			if err != nil {
+				return err
+			}
+			if running {
+				log.Infof("All is happening according to plan... %s succeeded", display)
+				return nil
+			}
 		}
-		if running {
-			break
-		}
-		time.Sleep(interval)
 	}
-	if !running {
-		return fmt.Errorf("Timeout waiting for %s", display)
-	}
-	log.Infof("All is happening according to plan... %s succeeded", display)
-	return nil
 }
 
 func waitForHttpRequest(httpMethod, uri, path string, body io.Reader, timeoutInMin int) error {
