@@ -50,6 +50,12 @@ type KogitoAppSpec struct {
 	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
 	EnableIstio bool `json:"enableIstio,omitempty"`
 
+	// Annotates the pods managed by the operator with the required metadata for Whatever to setup its sidecars, enabling the mesh. Defaults to false.
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors=true
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.displayName="Enable Whatever"
+	// +operator-sdk:gen-csv:customresourcedefinitions.specDescriptors.x-descriptors="urn:alm:descriptor:com.tectonic.ui:booleanSwitch"
+	EnableWhatever bool `json:"enableWhatever,omitempty"`
+
 	// Set this property to true to tell the operator to deploy an instance of Infinispan via the Infinispan Operator and
 	// configure this service to connect to the deployed server.
 	// For Quarkus runtime, it sets QUARKUS_INFINISPAN_CLIENT_* environment variables. For Spring Boot, these variables start with SPRING_INFINISPAN_CLIENT_*.
