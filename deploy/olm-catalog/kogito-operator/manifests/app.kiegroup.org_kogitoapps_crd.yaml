@@ -306,6 +306,11 @@ spec:
                 Set to false or ignore it if your service does not need persistence
                 or if you are going to configure the persistence infrastructure yourself.'
               type: boolean
+            enableWhatever:
+              description: Annotates the pods managed by the operator with the required
+                metadata for Whatever to setup its sidecars, enabling the mesh. Defaults
+                to false.
+              type: boolean
             envs:
               description: Environment variables to be added to the runtime container.
                 Keys must be a C_IDENTIFIER.
