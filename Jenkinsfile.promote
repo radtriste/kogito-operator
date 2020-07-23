@@ -49,6 +49,8 @@ pipeline {
         // TODO to uncomment
         //BOT_CREDENTIALS_ID = "bsig-gh-bot"
         BOT_CREDENTIALS_ID = "radtriste-bot"
+        // for github-release
+        GITHUB_REPO = "kogito-cloud-operator"
 
         // TODO to remove & where used
         AUTHOR_CREDS_ID = "radtriste"
@@ -103,7 +105,7 @@ pipeline {
                 }
             }
         }
-        stage('Merge PR and tag') {
+        stage('Merge PR, tag and release CLI') {
             when {
                 expression { return isRelease() }
             }
@@ -119,9 +121,8 @@ pipeline {
                             githubscm.pushObject("origin", getBuildBranch(), env.AUTHOR_CREDS_ID)
                         }
 
-                        if(getGitTag() != ""){
-                            githubscm.tagRepository(getGitTag() , env.BUILD_TAG)
-                            githubscm.pushObject("origin", "--tags ${getGitTag()}", env.AUTHOR_CREDS_ID)
+                        if(isRelease() && getGitTag() != ""){
+                            releaseCLI()
                         }
                     }
                 }
@@ -235,7 +236,6 @@ void pullImages(){
         sh "podman pull ${getOldImageFullTag(imageName)}"
     }
 }
-
 void tagImages() {
     for(String imageName : IMAGES){
         sh "podman tag ${getOldImageFullTag(imageName)} ${getNewImageFullTag(imageName, getNewImageTag())}"
@@ -289,6 +289,25 @@ void loginOpenshiftRegistry(){
 void loginContainerRegistry(String registry, String credsId){
     withCredentials([usernamePassword(credentialsId: credsId, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PWD')]) {
         sh "podman login -u ${REGISTRY_USER} -p ${REGISTRY_PWD} --tls-verify=false ${registry}"
+    }
+}
+
+void releaseCLI() {
+    sh "./hack/go-build-cli.sh true ${getProjectVersion()}"
+    def releaseName = "Kogito Operator and CLI Version ${getProjectVersion()}" 
+    def description = "Kogito Operator is an OpenShift based operator for deployment of Kogito Runtimes from source. Additionally, to facilitate interactions with the operator we also offer a CLI (Command Line Interface) that can deploy Kogito applications for you." 
+    def releasePath = "build/_output/release/" 
+    def cliBaseName = "kogito-cli-${getProjectVersion()}" 
+    def darwinFileName = "${cliBaseName}-darwin-amd64.tar.gz"
+    def linuxFileName = "${cliBaseName}-linux-amd64.tar.gz"
+    def windowsFileName = "${cliBaseName}-windows-amd64.zip"
+    withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]){
+        sh """
+        github-release release --tag ${getGitTag()} --target '${getBuildBranch()}' --name '${releaseName}' --description '${description}' --pre-release
+        github-release upload --tag ${getGitTag()} --name '${darwinFileName}' --file '${releasePath}${darwinFileName}'
+        github-release upload --tag ${getGitTag()} --name '${linuxFileName}' --file '${releasePath}${linuxFileName}'
+        github-release upload --tag ${getGitTag()} --name '${windowsFileName}' --file '${releasePath}${windowsFileName}'
+        """
     }
 }
 
