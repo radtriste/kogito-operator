@@ -109,7 +109,7 @@ metadata:
     tectonic-visibility: ocs
   labels:
     operator-kogitocloud: "true"
-  name: kogito-operator.v0.13.0
+  name: kogito-operator.v201.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -808,7 +808,7 @@ spec:
                       fieldPath: metadata.labels['name']
                 - name: DEBUG
                   value: "false"
-                image: quay.io/kiegroup/kogito-cloud-operator:0.13.0
+                image: quay.io/kiegroup/kogito-cloud-operator:201.0.0
                 imagePullPolicy: Always
                 name: kogito-cloud-operator
                 resources: {}
@@ -936,7 +936,7 @@ spec:
   - automation
   labels:
     alm-owner-kogito: kogito-operator
-    operated-by: kogito-operator.0.13.0
+    operated-by: kogito-operator.201.0.0
   links:
   - name: Product Page
     url: https://kogito.kie.org/
@@ -950,5 +950,5 @@ spec:
   maturity: alpha
   provider:
     name: Red Hat
-  replaces: kogito-operator.v0.12.0
-  version: 0.13.0
+  replaces: kogito-operator.v0.13.0
+  version: 201.0.0
