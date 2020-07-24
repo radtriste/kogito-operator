@@ -54,6 +54,10 @@ pipeline {
 
         // TODO to remove & where used
         AUTHOR_CREDS_ID = "radtriste"
+        
+        // TODO to uncomment
+        // RELEASE_CREDS_ID = "kie-ci"
+        RELEASE_CREDS_ID = "radtriste"
     }
 
     stages {
@@ -301,7 +305,7 @@ void releaseCLI() {
     def darwinFileName = "${cliBaseName}-darwin-amd64.tar.gz"
     def linuxFileName = "${cliBaseName}-linux-amd64.tar.gz"
     def windowsFileName = "${cliBaseName}-windows-amd64.zip"
-    withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]){
+    withCredentials([usernamePassword(credentialsId: env.RELEASE_CREDS_ID, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]){
         sh """
         github-release release --tag ${getGitTag()} --target '${getBuildBranch()}' --name '${releaseName}' --description '${description}' --pre-release
         github-release upload --tag ${getGitTag()} --name '${darwinFileName}' --file '${releasePath}${darwinFileName}'
