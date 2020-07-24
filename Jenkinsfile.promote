@@ -49,8 +49,12 @@ pipeline {
         // TODO to uncomment
         //BOT_CREDENTIALS_ID = "bsig-gh-bot"
         BOT_CREDENTIALS_ID = "radtriste-bot"
+        
         // for github-release
         GITHUB_REPO = "kogito-cloud-operator"
+        // TODO to uncomment
+        // GITHUB_RELEASE_CREDS_ID = "kie-ci"
+        GITHUB_RELEASE_CREDS_ID = "radtriste"
 
         // TODO to remove & where used
         AUTHOR_CREDS_ID = "radtriste"
@@ -71,6 +75,8 @@ pipeline {
                     if (isRelease()) {
                         assert getProjectVersion() != ''
                     }
+
+                    installGitHubReleaseCLI()
                 }
             }
         }
@@ -292,6 +298,12 @@ void loginContainerRegistry(String registry, String credsId){
     }
 }
 
+void installGitHubReleaseCLI(){
+    sh """
+        go get github.com/github-release/github-release
+    """
+}
+
 void releaseCLI() {
     sh "./hack/go-build-cli.sh true ${getProjectVersion()}"
     def releaseName = "Kogito Operator and CLI Version ${getProjectVersion()}" 
@@ -301,7 +313,7 @@ void releaseCLI() {
     def darwinFileName = "${cliBaseName}-darwin-amd64.tar.gz"
     def linuxFileName = "${cliBaseName}-linux-amd64.tar.gz"
     def windowsFileName = "${cliBaseName}-windows-amd64.zip"
-    withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]){
+    withCredentials([usernamePassword(credentialsId: env.GITHUB_RELEASE_CREDS_ID, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]){
         sh """
         github-release release --tag ${getGitTag()} --target '${getBuildBranch()}' --name '${releaseName}' --description '${description}' --pre-release
         github-release upload --tag ${getGitTag()} --name '${darwinFileName}' --file '${releasePath}${darwinFileName}'
