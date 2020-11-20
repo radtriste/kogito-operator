@@ -13,50 +13,16 @@ pipeline {
     }
 
     options {
-        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
         timeout(time: 360, unit: 'MINUTES')
-        disableConcurrentBuilds()
     }
 
-    parameters {
-        string(name: 'DISPLAY_NAME', defaultValue: '', description: 'Setup a specific build display name')
-        
-        // Git information
-        string(name: 'BUILD_BRANCH_NAME', defaultValue: 'master', description: 'Which branch to build ? Set if you are not on a multibranch pipeline.')
-        string(name: 'GIT_AUTHOR', defaultValue: 'kiegroup', description: 'Which Git author repository ?')
-
-        // Build&Test information
-        booleanParam(name: 'SMOKE_TESTS_ONLY', defaultValue: false, description: 'If only smoke tests should be run. Default is full testing.')
-        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests')
-        string(name: 'MAVEN_ARTIFACT_REPOSITORY', defaultValue: '', description: 'Maven repository where the build artifacts are present')
-
-        // Deploy information
-        booleanParam(name: 'IMAGE_USE_OPENSHIFT_REGISTRY', defaultValue: false, description: 'Set to true if image should be deployed in Openshift registry.In this case, IMAGE_REGISTRY_CREDENTIALS, IMAGE_REGISTRY and IMAGE_NAMESPACE parameters will be ignored')
-        string(name: 'IMAGE_REGISTRY_CREDENTIALS', defaultValue: '', description: 'Image registry credentials to use to deploy images. Will be ignored if no IMAGE_REGISTRY is given')
-        string(name: 'IMAGE_REGISTRY', defaultValue: '', description: 'Image registry to use to deploy images')
-        string(name: 'IMAGE_NAMESPACE', defaultValue: 'kiegroup', description: 'Image namespace to use to deploy images')
-        string(name: 'IMAGE_NAME_SUFFIX', defaultValue: '', description: 'Image name suffix to use to deploy images. In case you need to change the final image name, you can add a suffix to it.')
-        string(name: 'IMAGE_TAG', defaultValue: '', description: 'Image tag to use to deploy images')
-
-        // Test config if needed specifics. Else test default config will apply.
-        booleanParam(name: 'KOGITO_IMAGES_IN_OPENSHIFT_REGISTRY', defaultValue: false, description: 'Set to true if kogito images for tests are in internal Openshift registry.In this case, KOGITO_IMAGES_REGISTRY and KOGITO_IMAGES_NAMESPACE parameters will be ignored')
-        string(name: 'KOGITO_IMAGES_REGISTRY', defaultValue: '', description: 'Test images registry')
-        string(name: 'KOGITO_IMAGES_NAMESPACE', defaultValue: '', description: 'Test images namespace')
-        string(name: 'KOGITO_IMAGES_NAME_SUFFIX', defaultValue: '', description: 'Test images name suffix')
-        string(name: 'KOGITO_IMAGES_TAG', defaultValue: '', description: 'Test images tag')
-        string(name: 'EXAMPLES_URI', defaultValue: '', description: 'Git uri to the kogito-examples repository to use for tests.')
-        string(name: 'EXAMPLES_REF', defaultValue: '', description: 'Git reference (branch/tag) to the kogito-examples repository to use for tests.')
-
-        // Release information
-        booleanParam(name: 'RELEASE', defaultValue: false, description: 'Is this build for a release?')
-        string(name: 'PROJECT_VERSION', defaultValue: '', description: 'Optional if not RELEASE. If RELEASE, cannot be empty.')
-
-        // Bot author information. Set as params for easy testing.
-        string(name: 'GIT_AUTHOR_BOT', defaultValue: 'bsig-gh-bot', description: 'From which author should the PR be created ?')
-        string(name: 'BOT_CREDENTIALS_ID', defaultValue: 'bsig-gh-bot', description: 'Credentials for PR creation')
-    }
+    // parameters {
+    // For parameters, check into ./dsl/nightly_release.groovy file
+    // }
 
     environment {
+        // Some generated env is also defined into ./dsl/jobs/nightly_release.groovy file
+        
         JAVA_HOME = "${GRAALVM_HOME}"
         
         OPERATOR_IMAGE_NAME='kogito-cloud-operator'
@@ -92,7 +58,7 @@ pipeline {
             post {
                 success {
                     script {
-                        setDeployPropertyIfNeeded('git.branch', getBuildBranch())
+                        setDeployPropertyIfNeeded('git.branch', getGitBranch())
                         setDeployPropertyIfNeeded('git.author', getGitAuthor())
                         setDeployPropertyIfNeeded('project.version', getProjectVersion())
                         setDeployPropertyIfNeeded('release', isRelease())
@@ -119,7 +85,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "./hack/bump-version.sh ${getProjectVersion()} ${isRelease()} ${getBuildBranch() == 'master'}"
+                    sh "./hack/bump-version.sh ${getProjectVersion()} ${isRelease()} ${getGitBranch() == 'master'}"
                 
                     githubscm.commitChanges("Update project version to ${getProjectVersion()}", {
                         sh '''
@@ -259,15 +225,15 @@ pipeline {
             }
             steps {
                 script {
-                    String prMsg = "[${getBuildBranch()}] Update project version to ${getProjectVersion()} for release"
+                    String prMsg = "[${getGitBranch()}] Update project version to ${getProjectVersion()} for release"
                     def prBody = "Generated by build ${BUILD_TAG}: ${BUILD_URL}.\nPlease do not merge, it will be merged automatically after testing."
                     githubscm.pushObject('origin', getBotBranch(), getBotAuthorCredsID())
-                    deployProperties['kogito-cloud-operator.pr.link'] = githubscm.createPR(prMsg, prBody, getBuildBranch(), getBotAuthorCredsID())
+                    deployProperties['kogito-cloud-operator.pr.link'] = githubscm.createPR(prMsg, prBody, getGitBranch(), getBotAuthorCredsID())
                     
                     setDeployPropertyIfNeeded('kogito-cloud-operator.pr.source.uri', "https://github.com/${getBotAuthor()}/kogito-cloud-operator")
                     setDeployPropertyIfNeeded('kogito-cloud-operator.pr.source.ref', getBotBranch())
                     setDeployPropertyIfNeeded('kogito-cloud-operator.pr.target.uri', "https://github.com/${getGitAuthor()}/kogito-cloud-operator")
-                    setDeployPropertyIfNeeded('kogito-cloud-operator.pr.target.ref', getBuildBranch())
+                    setDeployPropertyIfNeeded('kogito-cloud-operator.pr.target.ref', getGitBranch())
                 }
             }
         }
@@ -296,7 +262,7 @@ void cleanImages(){
 
 void checkoutRepo() {
     deleteDir()
-    checkout(githubscm.resolveRepository('kogito-cloud-operator', getGitAuthor(), getBuildBranch(), false))
+    checkout(githubscm.resolveRepository('kogito-cloud-operator', getGitAuthor(), getGitBranch(), false))
 }
 
 String getOperatorVersion(){
@@ -402,12 +368,12 @@ boolean isRelease() {
     return params.RELEASE
 }
 
-String getBuildBranch(){
-    return params.BUILD_BRANCH_NAME
+String getGitBranch(){
+    return env.GIT_BRANCH
 }
 
 String getGitAuthor(){
-    return params.GIT_AUTHOR
+    return env.GIT_AUTHOR
 }
 
 String getBotBranch(){
@@ -415,11 +381,11 @@ String getBotBranch(){
 }
 
 String getBotAuthor(){
-    return params.GIT_AUTHOR_BOT
+    return env.GIT_AUTHOR_BOT
 }
 
 String getBotAuthorCredsID(){
-    return params.BOT_CREDENTIALS_ID
+    return env.BOT_CREDENTIALS_ID
 }
 
 String getProjectVersion(){
@@ -443,10 +409,11 @@ String getBDDParameters(String image_cache_mode, boolean runtime_app_registry_in
     testParamsMap['operator_image'] = getTempOpenshiftImageName(true)
     testParamsMap['operator_tag'] = getTempTag()
 
-    if (params.MAVEN_ARTIFACT_REPOSITORY) {
+    String mavenRepository = env.MAVEN_ARTIFACT_REPOSITORY ?: (isRelease() ? env.DEFAULT_STAGING_REPOSITORY : '')
+    if (mavenRepository) {
         // No mirror if we set directly the Maven repository
         // Tests will be slower but we need to test against specific artifacts
-        testParamsMap['custom_maven_repo'] = params.MAVEN_ARTIFACT_REPOSITORY
+        testParamsMap['custom_maven_repo'] = mavenRepository
         testParamsMap["maven_ignore_self_signed_certificate"] = true
     } 
     if(env.MAVEN_MIRROR_REPOSITORY) {

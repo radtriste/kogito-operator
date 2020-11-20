@@ -8,18 +8,16 @@ pipeline {
     }
 
     options {
-        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
         timeout(time: 120, unit: 'MINUTES')
     }
 
-    parameters {
-        string(name: 'DISPLAY_NAME', defaultValue: '', description: 'Setup a specific build display name')
-        
-        string(name: 'GIT_AUTHOR', defaultValue: 'kiegroup', description: 'Which Git author repository ?')
-        string(name: 'MANIFESTS_VERSION', defaultValue: '', description: 'Which version of manifests do you want to copy to master ?')
-    }
+    // parameters {
+    // For parameters, check into ./dsl/nightly_release.groovy file
+    // }
 
     environment {
+        // Some generated env is also defined into ./dsl/jobs/nightly_release.groovy file
+        
         OLM_BASE_FOLDER = "deploy/olm-catalog/kogito-operator"
         // OLM_VERSION_FOLDER => will be set in Initialization phase
 
