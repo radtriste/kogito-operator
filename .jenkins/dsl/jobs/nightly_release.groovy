@@ -69,7 +69,7 @@ KogitoJobTemplate.createPipelineJob(this, getJobParams('kogito-operator-deploy',
     environmentVariables {
         env('JENKINS_EMAIL_CREDS_ID', "${JENKINS_EMAIL_CREDS_ID}")
 
-        env('GIT_BRANCH', "${GIT_BRANCH}")
+        env('GIT_BRANCH_NAME', "${GIT_BRANCH}")
         env('GIT_AUTHOR', "${GIT_AUTHOR_NAME}")
         env('GIT_AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
         env('GITHUB_TOKEN_CREDS_ID', "${GIT_AUTHOR_TOKEN_CREDENTIALS_ID}")
@@ -115,7 +115,7 @@ KogitoJobTemplate.createPipelineJob(this, getJobParams('kogito-operator-promote'
     environmentVariables {
         env('JENKINS_EMAIL_CREDS_ID', "${JENKINS_EMAIL_CREDS_ID}")
 
-        env('GIT_BRANCH', "${GIT_BRANCH}")
+        env('GIT_BRANCH_NAME', "${GIT_BRANCH}")
         env('GIT_AUTHOR', "${GIT_AUTHOR_NAME}")
         env('GIT_AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
         env('GITHUB_TOKEN_CREDS_ID', "${GIT_AUTHOR_TOKEN_CREDENTIALS_ID}")

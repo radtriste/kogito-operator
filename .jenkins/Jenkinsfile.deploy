@@ -369,7 +369,7 @@ boolean isRelease() {
 }
 
 String getGitBranch(){
-    return env.GIT_BRANCH
+    return env.GIT_BRANCH_NAME
 }
 
 String getGitAuthor(){
