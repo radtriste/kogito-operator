@@ -71,10 +71,10 @@ KogitoJobTemplate.createPipelineJob(this, getJobParams('kogito-operator-deploy',
 
         env('GIT_BRANCH_NAME', "${GIT_BRANCH}")
         env('GIT_AUTHOR', "${GIT_AUTHOR_NAME}")
-        env('GIT_AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
+        env('AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
         env('GITHUB_TOKEN_CREDS_ID', "${GIT_AUTHOR_TOKEN_CREDENTIALS_ID}")
-        env('BOT_AUTHOR', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
-        env('BOT_AUTHOR_CREDS_ID', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
+        env('GIT_AUTHOR_BOT', "${GIT_BOT_AUTHOR_NAME}")
+        env('BOT_CREDENTIALS_ID', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
 
         env('DEFAULT_STAGING_REPOSITORY', "${MAVEN_NEXUS_STAGING_PROFILE_URL}")
         env('MAVEN_ARTIFACT_REPOSITORY', "${MAVEN_ARTIFACTS_REPOSITORY}")
@@ -117,9 +117,9 @@ KogitoJobTemplate.createPipelineJob(this, getJobParams('kogito-operator-promote'
 
         env('GIT_BRANCH_NAME', "${GIT_BRANCH}")
         env('GIT_AUTHOR', "${GIT_AUTHOR_NAME}")
-        env('GIT_AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
+        env('AUTHOR_CREDS_ID', "${GIT_AUTHOR_CREDENTIALS_ID}")
         env('GITHUB_TOKEN_CREDS_ID', "${GIT_AUTHOR_TOKEN_CREDENTIALS_ID}")
-        env('BOT_AUTHOR', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
-        env('BOT_AUTHOR_CREDS_ID', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
+        env('GIT_AUTHOR_BOT', "${GIT_BOT_AUTHOR_NAME}")
+        env('BOT_CREDENTIALS_ID', "${GIT_BOT_AUTHOR_CREDENTIALS_ID}")
     }
 }
