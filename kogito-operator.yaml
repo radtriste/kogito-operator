@@ -2500,6 +2500,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['olm.targetNamespaces']
-        image: quay.io/kiegroup/kogito-cloud-operator:2.0.0-snapshot
+        image: quay.io/kiegroup/kogito-cloud-operator:3422.5.0
         name: manager
       terminationGracePeriodSeconds: 10
