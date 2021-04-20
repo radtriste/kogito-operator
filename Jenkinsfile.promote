@@ -40,81 +40,81 @@ pipeline {
 
                     properties.readFromUrl(helper.getDeployPropertiesFileUrl())
 
-                    if (helper.isRelease()) {
-                        // Verify version is set and if on right release branch
-                        assert helper.getProjectVersion()
+                    // if (helper.isRelease()) {
+                    //     // Verify version is set and if on right release branch
+                    //     assert helper.getProjectVersion()
 
-                        assert helper.getBuildBranch() == util.getReleaseBranchFromVersion(helper.getProjectVersion())
-                    }
+                    //     assert helper.getBuildBranch() == util.getReleaseBranchFromVersion(helper.getProjectVersion())
+                    // }
 
-                    helper.installGitHubReleaseCLI()
+                    // helper.installGitHubReleaseCLI()
                 }
             }
         }
-        stage('Pull "old" images') {
-            steps {
-                script {
-                    helper.loginRegistry(baseImageParamsPrefix)
+        // stage('Pull "old" images') {
+        //     steps {
+        //         script {
+        //             helper.loginRegistry(baseImageParamsPrefix)
 
-                    for (String imageName : IMAGES) {
-                        container.pullImage(helper.getImageFullTag(imageName, baseImageParamsPrefix))
-                    }
-                }
-            }
-        }
-        stage('Tag images') {
-            steps {
-                script {
-                    for (String imageName : IMAGES) {
-                        container.tagImage(helper.getImageFullTag(imageName, baseImageParamsPrefix), helper.getImageFullTag(imageName, promoteImageParamsPrefix))
-                        if (helper.isDeployLatestTag()) {
-                            container.tagImage(helper.getImageFullTag(imageName, baseImageParamsPrefix), helper.getImageFullTag(imageName, promoteImageParamsPrefix, 'latest'))
-                        }
-                    }
-                }
-            }
-        }
-        stage('Pushing') {
-            steps {
-                script {
-                    helper.loginRegistry(promoteImageParamsPrefix)
+        //             for (String imageName : IMAGES) {
+        //                 container.pullImage(helper.getImageFullTag(imageName, baseImageParamsPrefix))
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Tag images') {
+        //     steps {
+        //         script {
+        //             for (String imageName : IMAGES) {
+        //                 container.tagImage(helper.getImageFullTag(imageName, baseImageParamsPrefix), helper.getImageFullTag(imageName, promoteImageParamsPrefix))
+        //                 if (helper.isDeployLatestTag()) {
+        //                     container.tagImage(helper.getImageFullTag(imageName, baseImageParamsPrefix), helper.getImageFullTag(imageName, promoteImageParamsPrefix, 'latest'))
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Pushing') {
+        //     steps {
+        //         script {
+        //             helper.loginRegistry(promoteImageParamsPrefix)
 
-                    for (String imageName : IMAGES) {
-                        container.pushImage(helper.getImageFullTag(imageName, promoteImageParamsPrefix))
-                        if (helper.isDeployLatestTag()) {
-                            container.pushImage(helper.getImageFullTag(imageName, promoteImageParamsPrefix, 'latest'))
-                        }
+        //             for (String imageName : IMAGES) {
+        //                 container.pushImage(helper.getImageFullTag(imageName, promoteImageParamsPrefix))
+        //                 if (helper.isDeployLatestTag()) {
+        //                     container.pushImage(helper.getImageFullTag(imageName, promoteImageParamsPrefix, 'latest'))
+        //                 }
 
-                        if (helper.getImageRegistry() == 'quay.io') {
-                            helper.makeQuayImagePublic(helper.getFullImageName(imageName))
-                        }
-                    }
-                }
-            }
-        }
-        stage('Merge PR, tag and release CLI') {
-            when {
-                expression { return helper.isRelease() }
-            }
-            steps {
-                script {
-                    dir(helper.getRepoName()) {
-                        helper.checkoutRepo()
+        //                 if (helper.getImageRegistry() == 'quay.io') {
+        //                     helper.makeQuayImagePublic(helper.getFullImageName(imageName))
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Merge PR, tag and release CLI') {
+        //     when {
+        //         expression { return helper.isRelease() }
+        //     }
+        //     steps {
+        //         script {
+        //             dir(helper.getRepoName()) {
+        //                 helper.checkoutRepo()
 
-                        // Merge PR
-                        String prLink = properties.retrieve("${helper.getRepoName()}.pr.link")
-                        if (prLink) {
-                            githubscm.mergePR(prLink, helper.getGitAuthorCredsID())
-                            githubscm.pushObject('origin', helper.getBuildBranch(), helper.getGitAuthorCredsID())
-                        }
+        //                 // Merge PR
+        //                 String prLink = properties.retrieve("${helper.getRepoName()}.pr.link")
+        //                 if (prLink) {
+        //                     githubscm.mergePR(prLink, helper.getGitAuthorCredsID())
+        //                     githubscm.pushObject('origin', helper.getBuildBranch(), helper.getGitAuthorCredsID())
+        //                 }
 
-                        if (helper.getGitTag()) {
-                            helper.createRelease()
-                        }
-                    }
-                }
-            }
-        }
+        //                 if (helper.getGitTag()) {
+        //                     helper.createRelease()
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         stage('Set next snapshot version') {
             when {
                 expression { return helper.isRelease() }
@@ -146,6 +146,7 @@ pipeline {
                         prLink = githubscm.createPR(commitMsg, prBody, helper.getBuildBranch(), helper.getBotAuthorCredsID())
                     }
                     dir(helper.getRepoName()) {
+                        helper.checkoutRepo()
                         if (prLink) {
                             githubscm.mergePR(prLink, helper.getGitAuthorCredsID())
                             githubscm.pushObject('origin', helper.getBuildBranch(), helper.getGitAuthorCredsID())
