@@ -146,6 +146,7 @@ pipeline {
                         prLink = githubscm.createPR(commitMsg, prBody, helper.getBuildBranch(), helper.getBotAuthorCredsID())
                     }
                     dir(helper.getRepoName()) {
+                        helper.checkoutRepo()
                         if (prLink) {
                             githubscm.mergePR(prLink, helper.getGitAuthorCredsID())
                             githubscm.pushObject('origin', helper.getBuildBranch(), helper.getGitAuthorCredsID())
