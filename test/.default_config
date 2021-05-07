@@ -1,8 +1,8 @@
-tests.build-image-version=1.5
+tests.build-image-version=250.1
 tests.build-image-name-suffix=nightly
-tests.services-image-version=1.5
+tests.services-image-version=250.1
 tests.services-image-name-suffix=nightly
 tests.runtime-application-image-name-prefix=examples
 tests.runtime-application-image-name-suffix=nightly
-tests.runtime-application-image-version=1.5
-tests.examples-ref=1.5.x
+tests.runtime-application-image-version=250.1
+tests.examples-ref=250.1.x
