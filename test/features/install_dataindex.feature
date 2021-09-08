@@ -89,4 +89,61 @@ Feature: Kogito Data Index
     }
     """
 
+#####
+
+  @failover
+  @events
+  @infinispan
+  @kafka
+  @test
+  Scenario Outline: Test Kogito Data Index failover with Infinispan
+    Given Infinispan Operator is deployed
+    And Infinispan instance "kogito-infinispan" is deployed with configuration:
+      | username | developer |
+      | password | mypass    |
+    And Install Infinispan Kogito Infra "infinispan" targeting service "kogito-infinispan" within 5 minutes
+    And Install Kogito Data Index with 1 replicas with configuration:
+      | config | infra | infinispan |
+      | config | infra | kafka      |
+    And Clone Kogito examples into local directory
+    And Local example service "process-quarkus-example" is built by Maven and deployed to runtime registry with Maven configuration:
+      | profile | persistence,events |
+
+    When Deploy quarkus example service "process-quarkus-example" from runtime registry with configuration:
+      | config | infra | infinispan |
+      | config | infra | kafka      |
+    And Kogito Runtime "process-quarkus-example" has 1 pods running within 10 minutes
+    And Start "orders" process on service "process-quarkus-example" within 3 minutes with body:
+      """json
+      {
+        "approver" : "john",
+        "order" : {
+          "orderNumber" : "12345",
+          "shipped" : false
+        }
+      }
+      """
+
+    Then Service "process-quarkus-example" contains 1 instances of process with name "orders"
+    Then GraphQL request on Data Index service returns 1 instance of process with name "orders" within 2 minutes
+
+    When Scale Infinispan instance "kogito-infinispan" to 0 pods within 2 minutes
+    Then GraphQL request on Data Index service returns 0 instances of process with name "orders" within 2 minutes
+
+    When Scale Infinispan instance "kogito-infinispan" to 1 pods within 2 minutes
+    Then GraphQL request on Data Index service returns 1 instances of process with name "orders" within 2 minutes
+
+    When Start "orders" process on service "process-quarkus-example" within 3 minutes with body:
+      """json
+      {
+        "approver" : "john",
+        "order" : {
+          "orderNumber" : "12345",
+          "shipped" : false
+        }
+      }
+      """
+    Then Service "process-quarkus-example" contains 2 instances of process with name "orders"
+    And GraphQL request on Data Index service returns 2 instances of process with name "orders" within 2 minutes
+
 # External Kafka testing is covered in deploy_quarkus_service and deploy_springboot_service as it checks integration between Data index and KogitoRuntime
