@@ -334,7 +334,7 @@ Map getBDDCommonParameters(boolean runtime_app_registry_internal) {
     testParamsMap['load_default_config'] = true
     testParamsMap['ci'] = 'jenkins'
 
-    testParamsMap['operator_image'] = getTempOpenshiftImageName(true)
+    testParamsMap['operator_image_tag'] = getTempOpenshiftImageName(true)
     testParamsMap['operator_tag'] = getTempTag()
 
     String mavenRepository = env.MAVEN_ARTIFACT_REPOSITORY ?: (isRelease() ? env.DEFAULT_STAGING_REPOSITORY : '')

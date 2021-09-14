@@ -235,7 +235,7 @@ func GetKogitoBuildS2IImage() string {
 		return config.GetBuildBuilderImageStreamTag()
 	}
 
-	return GetKogitoBuildImage(kogitobuild.GetDefaultBuilderImage(), true)
+	return ConstructDefaultImageFullTag(kogitobuild.GetDefaultBuilderImage())
 }
 
 // GetKogitoBuildRuntimeImage returns the Runtime image tag
@@ -252,30 +252,17 @@ func GetKogitoBuildRuntimeImage(native bool) string {
 		}
 		imageName = kogitobuild.GetDefaultRuntimeJVMImage()
 	}
-	return GetKogitoBuildImage(imageName, true)
+	return ConstructDefaultImageFullTag(imageName)
 }
 
-// GetKogitoBuildImage returns a build image with defaults set
-func GetKogitoBuildImage(imageName string, useDefaultValues bool) string {
+// ConstructDefaultImageFullTag construct the full image tag (adding default registry and tag)
+func ConstructDefaultImageFullTag(imageName string) string {
 	image := api.Image{
-		Name: imageName,
-		Tag:  config.GetBuildImageVersion(),
+		Domain: infrastructure.GetDefaultImageRegistry(),
+		Name:   imageName,
+		Tag:    infrastructure.GetKogitoImageVersion(version.Version),
 	}
 
-	if len(config.GetBuildImageRegistry()) > 0 {
-		image.Domain = config.GetBuildImageRegistry()
-	} else if useDefaultValues {
-		image.Domain = infrastructure.GetDefaultImageRegistry()
-	}
-
-	if len(image.Tag) == 0 && useDefaultValues {
-		image.Tag = infrastructure.GetKogitoImageVersion(version.Version)
-	}
-
-	// Update image name with suffix if provided
-	if len(config.GetBuildImageNameSuffix()) > 0 {
-		image.Name = fmt.Sprintf("%s-%s", imageName, config.GetBuildImageNameSuffix())
-	}
 	return framework.ConvertImageToImageTag(image)
 }
 

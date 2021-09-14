@@ -53,8 +53,7 @@ function usage(){
   printf "\n--olm_namespace \n\tSet the namespace which is used for cluster scope operators. Default is 'openshift-operators'."
 
   # operator information
-  printf "\n--operator_image {NAME}\n\tOperator image name. Default is 'quay.io/kiegroup/kogito-operator' one."
-  printf "\n--operator_tag {TAG}\n\tOperator image tag. Default is operator version."
+  printf "\n--operator_image_tag {IMAGE_TAG}\n\tOperator image name. Default is 'quay.io/kiegroup/kogito-operator' one."
   printf "\n--operator_namespaced {TAG}\n\tSet to true to deploy Kogito operator into namespace used for scenario execution, false for cluster wide deployment. Default is false."
   printf "\n--operator_installation_source {TAG}\n\tDefines installation source for the Kogito operator. Options are 'olm' and 'yaml'. Default is yaml."
   printf "\n--operator_catalog_image {TAG}\n\tDefines image containing operator catalog. Needs to be specified only when operator_installation_source is 'olm'."
@@ -69,10 +68,6 @@ function usage(){
   printf "\n--cli_path {PATH}\n\tPath to built CLI to test. Default is local built one."
 
   # runtime
-
-  printf "\n--services_image_registry {REGISTRY}\n\tSet the services image registry."
-  printf "\n--services_image_name_suffix {NAMESPACE}\n\tSet the build image name suffix to append to usual image names."
-  printf "\n--services_image_version {VERSION}\n\tSet the services image version."
   printf "\n--data_index_image_tag {IMAGE_TAG}\n\tSet the Kogito Data Index image tag ('services_image_version' is ignored)"
   printf "\n--explainability_image_tag {IMAGE_TAG}\n\tSet the Kogito Explainability image tag ('services-image-version' is ignored)"
   printf "\n--jobs_service_image_tag {IMAGE_TAG}\n\tSet the Kogito Jobs Service image tag ('services_image_version' is ignored)"
@@ -90,13 +85,9 @@ function usage(){
   printf "\n--custom_maven_repo_replace_default\n\tIf you specified the option 'custom_maven_repo' and you want that one to replace the main JBoss repository (useful with snapshots)."
   printf "\n--maven_mirror {URI}\n\tMaven mirror url to be used when building app in the tests."
   printf "\n--maven_ignore_self_signed_certificate\n\tSet to true if maven build need to ignore self-signed certificate. This could happen when using internal maven mirror url."
-  printf "\n--build_image_registry {REGISTRY}\n\tSet the build image registry."
-  printf "\n--build_image_name_suffix {NAMESPACE}\n\tSet the build image name suffix to append to usual image names."
-  printf "\n--build_image_version {VERSION}\n\tSet the build image version."
-  printf "\n--build_image_tag {TAG}\n\tSet the build image full tag."
-  printf "\n--build_builder_image_tag {TAG}\n\tSet the Builder image full tag."
-  printf "\n--build_runtime_jvm_image_tag {NAME}\n\tSet the Runtime JVM image full tag."
-  printf "\n--build_runtime_native_image_tag {NAME}\n\tSet the Runtime Native image full tag."
+  printf "\n--build_builder_image_tag {IMAGE_TAG}\n\tSet the Builder image full tag."
+  printf "\n--build_runtime_jvm_image_tag {IMAGE_TAG}\n\tSet the Runtime JVM image full tag."
+  printf "\n--build_runtime_native_image_tag {IMAGE_TAG}\n\tSet the Runtime Native image full tag."
   printf "\n--disable_maven_native_build_container\n\tBy default, Maven native builds are done in container (via container engine). Possibility to disable it."
 
   # examples repository
@@ -268,11 +259,7 @@ case $1 in
   ;;
 
   # operator information
-  --operator_image)
-    shift
-    if addParamKeyValueIfAccepted "--tests.operator-image-name" ${1}; then shift; fi
-  ;;
-  --operator_tag)
+  --operator_image_tag)
     shift
     if addParamKeyValueIfAccepted "--tests.operator-image-tag" ${1}; then shift; fi
   ;;
@@ -314,18 +301,6 @@ case $1 in
   ;;
 
   # runtime
-  --services_image_registry)
-    shift
-    if addParamKeyValueIfAccepted "--tests.services-image-registry" ${1}; then shift; fi
-  ;;
-  --services_image_name_suffix)
-    shift
-    if addParamKeyValueIfAccepted "--tests.services-image-name-suffix" ${1}; then shift; fi
-  ;;
-  --services_image_version)
-    shift
-    if addParamKeyValueIfAccepted "--tests.services-image-version" ${1}; then shift; fi
-  ;;
   --data_index_image_tag)
     shift
     if addParamKeyValueIfAccepted "--tests.data-index-image-tag" ${1}; then shift; fi
@@ -387,18 +362,6 @@ case $1 in
   --maven_ignore_self_signed_certificate)
     addParam "--tests.maven-ignore-self-signed-certificate"
     shift
-  ;;
-  --build_image_registry)
-    shift
-    if addParamKeyValueIfAccepted "--tests.build-image-registry" ${1}; then shift; fi
-  ;;
-  --build_image_name_suffix)
-    shift
-    if addParamKeyValueIfAccepted "--tests.build-image-name-suffix" ${1}; then shift; fi
-  ;;
-  --build_image_version)
-    shift
-    if addParamKeyValueIfAccepted "--tests.build-image-version" ${1}; then shift; fi
   ;;
   --build_builder_image_tag)
     shift

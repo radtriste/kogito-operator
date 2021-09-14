@@ -20,6 +20,15 @@ import (
 	"path/filepath"
 )
 
+type ConfigPersistenceType string
+
+const (
+	NoPersistenceType         ConfigPersistenceType = "nopersistence"
+	MongoDBPersistenceType    ConfigPersistenceType = "mongodb"
+	InfinispanPersistenceType ConfigPersistenceType = "infinispan"
+	PosgresqlPersistenceType  ConfigPersistenceType = "posgresql"
+)
+
 // TestConfig contains the information about the tests environment
 type TestConfig struct {
 	// tests configuration
@@ -36,7 +45,6 @@ type TestConfig struct {
 	olmNamespace     string
 
 	// operator information
-	operatorImageName          string
 	operatorImageTag           string
 	operatorNamespaced         bool
 	operatorInstallationSource string
@@ -52,10 +60,7 @@ type TestConfig struct {
 	cliPath         string
 
 	// runtime
-	servicesImageRegistry             string
-	servicesImageNameSuffix           string
-	servicesImageVersion              string
-	dataIndexImageTag                 string
+	dataIndexImageTags                map[ConfigPersistenceType]string
 	explainabilityImageTag            string
 	jobsServiceImageTag               string
 	mgmtConsoleImageTag               string
@@ -72,9 +77,6 @@ type TestConfig struct {
 	customMavenRepoReplaceDefault      bool
 	mavenMirrorURL                     string
 	mavenIgnoreSelfSignedCertificate   bool
-	buildImageRegistry                 string
-	buildImageNameSuffix               string
-	buildImageVersion                  string
 	buildBuilderImageTag               string
 	buildRuntimeJVMImageTag            string
 	buildRuntimeNativeImageTag         string
@@ -102,8 +104,6 @@ type TestConfig struct {
 }
 
 const (
-	defaultOperatorImageName = "quay.io/kiegroup/kogito-operator"
-
 	defaultOperatorYamlURI = "../kogito-operator.yaml"
 	defaultCliPath         = "../build/_output/bin/kogito"
 
@@ -122,7 +122,7 @@ const (
 )
 
 var (
-	defaultOperatorImageTag = version.Version
+	defaultOperatorImageTag = fmt.Sprintf("quay.io/kiegroup/kogito-operator:%s", version.Version)
 
 	env = TestConfig{}
 )
@@ -146,7 +146,6 @@ func BindFlags(set *flag.FlagSet) {
 	set.StringVar(&env.olmNamespace, prefix+"olm-namespace", "", "Set the namespace which is used for cluster scope operators. Default is 'openshift-operators'.")
 
 	// operator information
-	set.StringVar(&env.operatorImageName, prefix+"operator-image-name", defaultOperatorImageName, "Operator image name")
 	set.StringVar(&env.operatorImageTag, prefix+"operator-image-tag", defaultOperatorImageTag, "Operator image tag")
 	set.BoolVar(&env.operatorNamespaced, prefix+"operator-namespaced", false, "Set to true to deploy Kogito operator into namespace used for scenario execution, false for cluster wide deployment. Default is false.")
 	set.StringVar(&env.operatorInstallationSource, prefix+"operator-installation-source", installationSourceYaml, "Operator installation source")
@@ -162,9 +161,7 @@ func BindFlags(set *flag.FlagSet) {
 	set.StringVar(&env.cliPath, prefix+"cli-path", defaultCliPath, "Path to built CLI to test")
 
 	// runtime
-	set.StringVar(&env.servicesImageRegistry, prefix+"services-image-registry", "", "Set the services (jobs-service, data-index, trusty, explainability) image registry")
-	set.StringVar(&env.servicesImageNameSuffix, prefix+"services-image-name-suffix", "", "Set the services (jobs-service, data-index, trusty, explainability) image name suffix")
-	set.StringVar(&env.servicesImageVersion, prefix+"services-image-version", "", "Set the services (jobs-service, data-index, trusty, explainability) image version")
+	addPersistenceTypeImageTagFlags(set, prefix+"services-data-index", "Set the Kogito Data Index image tag")
 	set.StringVar(&env.dataIndexImageTag, prefix+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
 	set.StringVar(&env.explainabilityImageTag, prefix+"explainability-image-tag", "", "Set the Kogito Explainability image tag ('services-image-version' is ignored)")
 	set.StringVar(&env.jobsServiceImageTag, prefix+"jobs-service-image-tag", "", "Set the Kogito Jobs Service image tag ('services-image-version' is ignored)")
@@ -182,9 +179,6 @@ func BindFlags(set *flag.FlagSet) {
 	set.BoolVar(&env.customMavenRepoReplaceDefault, prefix+"custom-maven-repo-replace-default", false, "If you specified the option 'tests.custom-maven-repo-url' and you want that one to replace the main JBoss repository (useful with snapshots).")
 	set.StringVar(&env.mavenMirrorURL, prefix+"maven-mirror-url", "", "Maven mirror url to be used when building app in the tests")
 	set.BoolVar(&env.mavenIgnoreSelfSignedCertificate, prefix+"maven-ignore-self-signed-certificate", false, "Set to true if maven build need to ignore self-signed certificate. This could happen when using internal maven mirror url.")
-	set.StringVar(&env.buildImageRegistry, prefix+"build-image-registry", "", "Set the build image registry")
-	set.StringVar(&env.buildImageNameSuffix, prefix+"build-image-name-suffix", "", "Set the build image name suffix")
-	set.StringVar(&env.buildImageVersion, prefix+"build-image-version", "", "Set the build image version")
 	set.StringVar(&env.buildBuilderImageTag, prefix+"build-builder-image-tag", "", "Set the S2I build image full tag")
 	set.StringVar(&env.buildRuntimeJVMImageTag, prefix+"build-runtime-jvm-image-tag", "", "Set the Runtime build image full tag")
 	set.StringVar(&env.buildRuntimeNativeImageTag, prefix+"build-runtime-native-image-tag", "", "Set the Runtime build image full tag")
@@ -209,6 +203,18 @@ func BindFlags(set *flag.FlagSet) {
 	set.BoolVar(&env.keepNamespace, prefix+"keep-namespace", false, "Do not delete namespace(s) after scenario run (WARNING: can be resources consuming ...)")
 	set.StringVar(&env.namespaceName, developmentOptionsPrefix+"namespace-name", "", "Use the specified namespace for scenarios, don't generate random namespace.")
 	set.BoolVar(&env.localCluster, developmentOptionsPrefix+"local-cluster", false, "If tests are launch using a local cluster")
+}
+
+func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageMaps *map[ConfigPersistenceType]string, keyPrefix, descriptionPrefix string) {
+	// imageMaps[NoPersistenceType] = ""
+	set.StringVar(&(*imageMaps)[NoPersistenceType]), keyPrefix+"-image-tag", "", "Set the Kogito Data Index image tag for inmemory persistence type")
+	// set.StringVar(&env.dataIndexImageTag, keyPrefix+MongoDB+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
+}
+
+func addPersistenceTypeImageTagFlag(set *flag.FlagSet, ConfigPersisimageMaps *map[ConfigPersistenceType]string, keyPrefix, descriptionPrefix string) {
+	// imageMaps[NoPersistenceType] = ""
+	set.StringVar(&(*imageMaps)[NoPersistenceType]), keyPrefix+"-image-tag", "", "Set the Kogito Data Index image tag for inmemory persistence type")
+	// set.StringVar(&env.dataIndexImageTag, keyPrefix+MongoDB+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
 }
 
 // tests configuration
@@ -270,11 +276,6 @@ func GetOlmNamespace() string {
 
 // operator information
 
-// GetOperatorImageName return the image name for the operator
-func GetOperatorImageName() string {
-	return env.operatorImageName
-}
-
 // GetOperatorImageTag return the image tag for the operator
 func GetOperatorImageTag() string {
 	return env.operatorImageTag
@@ -330,21 +331,6 @@ func GetOperatorCliPath() (string, error) {
 }
 
 // runtime
-
-// GetServicesImageRegistry return the registry for the services images
-func GetServicesImageRegistry() string {
-	return env.servicesImageRegistry
-}
-
-// GetServicesImageNameSuffix return the name suffix for the services images
-func GetServicesImageNameSuffix() string {
-	return env.servicesImageNameSuffix
-}
-
-// GetServicesImageVersion return the version for the services images
-func GetServicesImageVersion() string {
-	return env.servicesImageVersion
-}
 
 // GetDataIndexImageTag return the Kogito Data Index image tag
 func GetDataIndexImageTag() string {
@@ -421,21 +407,6 @@ func GetMavenMirrorURL() string {
 // IsMavenIgnoreSelfSignedCertificate return whether self-signed certficate should be ignored
 func IsMavenIgnoreSelfSignedCertificate() bool {
 	return env.mavenIgnoreSelfSignedCertificate
-}
-
-// GetBuildImageRegistry return the registry for the build images
-func GetBuildImageRegistry() string {
-	return env.buildImageRegistry
-}
-
-// GetBuildImageNameSuffix return the namespace for the build images
-func GetBuildImageNameSuffix() string {
-	return env.buildImageNameSuffix
-}
-
-// GetBuildImageVersion return the version for the build images
-func GetBuildImageVersion() string {
-	return env.buildImageVersion
 }
 
 // GetBuildBuilderImageStreamTag return the tag for the builder image

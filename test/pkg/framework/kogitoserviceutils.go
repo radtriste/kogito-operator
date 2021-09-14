@@ -20,12 +20,8 @@ import (
 	"github.com/kiegroup/kogito-operator/apis/app/v1beta1"
 
 	api "github.com/kiegroup/kogito-operator/apis"
-	"github.com/kiegroup/kogito-operator/core/infrastructure"
-	"github.com/kiegroup/kogito-operator/version"
 
 	"github.com/kiegroup/kogito-operator/core/client/kubernetes"
-	"github.com/kiegroup/kogito-operator/core/framework"
-	"github.com/kiegroup/kogito-operator/test/pkg/config"
 	"github.com/kiegroup/kogito-operator/test/pkg/framework/mappers"
 	bddtypes "github.com/kiegroup/kogito-operator/test/pkg/types"
 	corev1 "k8s.io/api/core/v1"
@@ -119,32 +115,8 @@ func NewImageOrDefault(fullImage string, defaultImageName string) string {
 		return fullImage
 	}
 
-	image := api.Image{}
-	if isRuntimeImageInformationSet() {
-		image.Domain = config.GetServicesImageRegistry()
-		image.Name = defaultImageName
-		image.Tag = config.GetServicesImageVersion()
+	return ConstructDefaultImageFullTag(defaultImageName)
 
-		if len(image.Domain) == 0 {
-			image.Domain = infrastructure.GetDefaultImageRegistry()
-		}
-
-		if len(image.Tag) == 0 {
-			image.Tag = infrastructure.GetKogitoImageVersion(version.Version)
-		}
-
-		// Update image name with suffix if provided
-		if len(config.GetServicesImageNameSuffix()) > 0 {
-			image.Name = fmt.Sprintf("%s-%s", image.Name, config.GetServicesImageNameSuffix())
-		}
-	}
-	return framework.ConvertImageToImageTag(image)
-}
-
-func isRuntimeImageInformationSet() bool {
-	return len(config.GetServicesImageRegistry()) > 0 ||
-		len(config.GetServicesImageNameSuffix()) > 0 ||
-		len(config.GetServicesImageVersion()) > 0
 }
 
 func crInstall(serviceHolder *bddtypes.KogitoServiceHolder) error {
