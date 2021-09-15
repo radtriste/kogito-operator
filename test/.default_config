@@ -1,13 +1,6 @@
 tests.build-builder-image-tag=quay.io/kiegroup/kogito-builder-nightly:latest
 tests.build-runtime-jvm-image-tag=quay.io/kiegroup/kogito-runtime-jvm-nightly:latest
 tests.build-runtime-native-image-tag=quay.io/kiegroup/kogito-runtime-native-nightly:latest
-tests.data-index-image-tag=quay.io/kiegroup/kogito-builder-nightly:latest
-tests.explainability-image-tag=
-tests.jobs-service-image-tag=
-tests.management-console-image-tag=
-tests.task-console-image-tag=
-tests.trusty-image-tag=
-tests.trusty-ui-image-tag=
 tests.runtime-application-image-name-prefix=examples
 tests.runtime-application-image-name-suffix=nightly
 tests.runtime-application-image-version=latest

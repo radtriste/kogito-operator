@@ -20,22 +20,12 @@ import (
 	"path/filepath"
 )
 
-type ConfigPersistenceType string
-
-const (
-	NoPersistenceType         ConfigPersistenceType = "nopersistence"
-	MongoDBPersistenceType    ConfigPersistenceType = "mongodb"
-	InfinispanPersistenceType ConfigPersistenceType = "infinispan"
-	PosgresqlPersistenceType  ConfigPersistenceType = "posgresql"
-)
-
 // TestConfig contains the information about the tests environment
 type TestConfig struct {
 	// tests configuration
 	smoke            bool
 	performance      bool
 	loadFactor       int
-	localTests       bool
 	ciName           string
 	crDeploymentOnly bool
 	containerEngine  string
@@ -60,13 +50,7 @@ type TestConfig struct {
 	cliPath         string
 
 	// runtime
-	dataIndexImageTags                map[ConfigPersistenceType]string
-	explainabilityImageTag            string
-	jobsServiceImageTag               string
-	mgmtConsoleImageTag               string
-	taskConsoleImageTag               string
-	trustyImageTag                    string
-	trustyUIImageTag                  string
+	servicesImageTags                 ImageTags
 	runtimeApplicationImageRegistry   string
 	runtimeApplicationImageNamePrefix string
 	runtimeApplicationImageNameSuffix string
@@ -101,6 +85,7 @@ type TestConfig struct {
 	keepNamespace bool
 	namespaceName string
 	localCluster  bool
+	localTests    bool
 }
 
 const (
@@ -135,86 +120,88 @@ func BindFlags(set *flag.FlagSet) {
 	// tests configuration
 	set.BoolVar(&env.smoke, prefix+"smoke", false, "Launch only smoke tests")
 	set.BoolVar(&env.performance, prefix+"performance", false, "Launch performance tests")
-	set.IntVar(&env.loadFactor, prefix+"load-factor", defaultLoadFactor, "Set the tests load factor. Useful for the tests to take into account that the cluster can be overloaded, for example for the calculation of timeouts. Default value is 1.")
-	set.BoolVar(&env.localTests, prefix+"local", false, "If tests are launch on local machine using either a local or remote cluster")
+	set.IntVar(&env.loadFactor, prefix+"load_factor", defaultLoadFactor, "Set the tests load factor. Useful for the tests to take into account that the cluster can be overloaded, for example for the calculation of timeouts. Default value is 1.")
+	set.BoolVar(&env.localTests, prefix+"local_execution", false, "If tests are launch on local machine using either a local or remote cluster")
 	set.StringVar(&env.ciName, prefix+"ci", "", "If tests are launch on ci machine, give the CI name")
-	set.BoolVar(&env.crDeploymentOnly, prefix+"cr-deployment-only", false, "Use this option if you have no CLI to test against. It will use only direct CR deployments.")
-	set.StringVar(&env.containerEngine, prefix+"container-engine", defaultContainerEngine, "Engine used to interact with images and local containers.")
-	set.StringVar(&env.domainSuffix, prefix+"domain-suffix", "", "Set the domain suffix for exposed services. Ignored when running tests on Openshift.")
-	set.StringVar(&env.imageCacheMode, prefix+"image-cache-mode", "if-available", "Use this option to specify whether you want to use image cache for runtime images. Available options are 'always', 'never' or 'if-available'(default).")
-	set.IntVar(&env.httpRetryNumber, prefix+"http-retry-nb", defaultHTTPRetryNumber, "Set the retry number for all HTTP calls in case it fails (and response code != 500). Default value is 3.")
-	set.StringVar(&env.olmNamespace, prefix+"olm-namespace", "", "Set the namespace which is used for cluster scope operators. Default is 'openshift-operators'.")
+	set.BoolVar(&env.crDeploymentOnly, prefix+"cr_deployment_only", false, "Use this option if you have no CLI to test against. It will use only direct CR deployments.")
+	set.StringVar(&env.containerEngine, prefix+"container_engine", defaultContainerEngine, "Engine used to interact with images and local containers.")
+	set.StringVar(&env.domainSuffix, prefix+"domain_suffix", "", "Set the domain suffix for exposed services. Ignored when running tests on Openshift.")
+	set.StringVar(&env.imageCacheMode, prefix+"image_cache_mode", "if-available", "Use this option to specify whether you want to use image cache for runtime images. Available options are 'always', 'never' or 'if-available'(default).")
+	set.IntVar(&env.httpRetryNumber, prefix+"http_retry_nb", defaultHTTPRetryNumber, "Set the retry number for all HTTP calls in case it fails (and response code != 500). Default value is 3.")
+	set.StringVar(&env.olmNamespace, prefix+"olm_namespace", "", "Set the namespace which is used for cluster scope operators. Default is 'openshift-operators'.")
 
 	// operator information
-	set.StringVar(&env.operatorImageTag, prefix+"operator-image-tag", defaultOperatorImageTag, "Operator image tag")
-	set.BoolVar(&env.operatorNamespaced, prefix+"operator-namespaced", false, "Set to true to deploy Kogito operator into namespace used for scenario execution, false for cluster wide deployment. Default is false.")
-	set.StringVar(&env.operatorInstallationSource, prefix+"operator-installation-source", installationSourceYaml, "Operator installation source")
-	set.StringVar(&env.operatorCatalogImage, prefix+"operator-catalog-image", "", "Operator catalog image")
+	set.StringVar(&env.operatorImageTag, prefix+"operator_image_tag", defaultOperatorImageTag, "Operator image tag")
+	set.BoolVar(&env.operatorNamespaced, prefix+"operator_namespaced", false, "Set to true to deploy Kogito operator into namespace used for scenario execution, false for cluster wide deployment. Default is false.")
+	set.StringVar(&env.operatorInstallationSource, prefix+"operator_installation_source", installationSourceYaml, "Operator installation source")
+	set.StringVar(&env.operatorCatalogImage, prefix+"operator_catalog_image", "", "Operator catalog image")
 
 	// operator profiling
-	set.BoolVar(&env.operatorProfiling, prefix+"operator-profiling", false, "Enable the profiling of the operator. If enabled, operator will be automatically deployed with yaml files.")
-	set.StringVar(&env.operatorProfilingDataAccessYamlURI, prefix+"operator-profiling-data-access-yaml-uri", defaultOperatorProfilingDataAccessYamlURI, "Url or Path to kogito-operator-profiling-data-access.yaml file.")
-	set.StringVar(&env.operatorProfilingOutputFileURI, prefix+"operator-profiling-output-file-uri", defaultOperatorProfilingOutputFileURI, "Url or Path where to store the profiling outputs.")
+	set.BoolVar(&env.operatorProfiling, prefix+"operator_profiling_enabled", false, "Enable the profiling of the operator. If enabled, operator will be automatically deployed with yaml files.")
+	set.StringVar(&env.operatorProfilingDataAccessYamlURI, prefix+"operator_profiling_data_access_yaml_uri", defaultOperatorProfilingDataAccessYamlURI, "Url or Path to kogito-operator-profiling-data-access.yaml file.")
+	set.StringVar(&env.operatorProfilingOutputFileURI, prefix+"operator_profiling_output_file_uri", defaultOperatorProfilingOutputFileURI, "Url or Path where to store the profiling outputs.")
 
 	// files/binaries
-	set.StringVar(&env.operatorYamlURI, prefix+"operator-yaml-uri", defaultOperatorYamlURI, "Url or Path to kogito-operator.yaml file")
-	set.StringVar(&env.cliPath, prefix+"cli-path", defaultCliPath, "Path to built CLI to test")
+	set.StringVar(&env.operatorYamlURI, prefix+"operator_yaml_uri", defaultOperatorYamlURI, "Url or Path to kogito-operator.yaml file")
+	set.StringVar(&env.cliPath, prefix+"cli_path", defaultCliPath, "Path to built CLI to test")
 
 	// runtime
-	addPersistenceTypeImageTagFlags(set, prefix+"services-data-index", "Set the Kogito Data Index image tag")
-	set.StringVar(&env.dataIndexImageTag, prefix+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.explainabilityImageTag, prefix+"explainability-image-tag", "", "Set the Kogito Explainability image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.jobsServiceImageTag, prefix+"jobs-service-image-tag", "", "Set the Kogito Jobs Service image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.mgmtConsoleImageTag, prefix+"management-console-image-tag", "", "Set the Kogito Management Console image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.taskConsoleImageTag, prefix+"task-console-image-tag", "", "Set the Kogito Task Console image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.trustyImageTag, prefix+"trusty-image-tag", "", "Set the Kogito Trusty image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.trustyUIImageTag, prefix+"trusty-ui-image-tag", "", "Set the Kogito Trusty UI image tag ('services-image-version' is ignored)")
-	set.StringVar(&env.runtimeApplicationImageRegistry, prefix+"runtime-application-image-registry", "", "Set the runtime application (built Kogito application image) image registry")
-	set.StringVar(&env.runtimeApplicationImageNamePrefix, prefix+"runtime-application-image-name-prefix", "", "Set the runtime application (built Kogito application image) image name prefix")
-	set.StringVar(&env.runtimeApplicationImageNameSuffix, prefix+"runtime-application-image-name-suffix", "", "Set the runtime application (built Kogito application image) image name suffix")
-	set.StringVar(&env.runtimeApplicationImageVersion, prefix+"runtime-application-image-version", "", "Set the runtime application (built Kogito application image) image version")
+	addAllPersistenceTypesImageTagFlags(set, &env.servicesImageTags, prefix+"services")
+
+	set.StringVar(&env.runtimeApplicationImageRegistry, prefix+"runtime_application_image_registry", "", "Set the runtime application (built Kogito application image) image registry")
+	set.StringVar(&env.runtimeApplicationImageNamePrefix, prefix+"runtime_application_image_name_prefix", "", "Set the runtime application (built Kogito application image) image name prefix")
+	set.StringVar(&env.runtimeApplicationImageNameSuffix, prefix+"runtime_application_image_name_suffix", "", "Set the runtime application (built Kogito application image) image name suffix")
+	set.StringVar(&env.runtimeApplicationImageVersion, prefix+"runtime_application_image_version", "", "Set the runtime application (built Kogito application image) image version")
 
 	// build
-	set.StringVar(&env.customMavenRepoURL, prefix+"custom-maven-repo-url", "", "Set a custom Maven repository url for S2I builds, in case your artifacts are in a specific repository. See https://github.com/kiegroup/kogito-images/README.md for more information")
-	set.BoolVar(&env.customMavenRepoReplaceDefault, prefix+"custom-maven-repo-replace-default", false, "If you specified the option 'tests.custom-maven-repo-url' and you want that one to replace the main JBoss repository (useful with snapshots).")
-	set.StringVar(&env.mavenMirrorURL, prefix+"maven-mirror-url", "", "Maven mirror url to be used when building app in the tests")
-	set.BoolVar(&env.mavenIgnoreSelfSignedCertificate, prefix+"maven-ignore-self-signed-certificate", false, "Set to true if maven build need to ignore self-signed certificate. This could happen when using internal maven mirror url.")
-	set.StringVar(&env.buildBuilderImageTag, prefix+"build-builder-image-tag", "", "Set the S2I build image full tag")
-	set.StringVar(&env.buildRuntimeJVMImageTag, prefix+"build-runtime-jvm-image-tag", "", "Set the Runtime build image full tag")
-	set.StringVar(&env.buildRuntimeNativeImageTag, prefix+"build-runtime-native-image-tag", "", "Set the Runtime build image full tag")
-	set.BoolVar(&env.disableMavenNativeBuildInContainer, prefix+"disable-maven-native-build-container", false, "By default, Maven native builds are done in container (via container engine). Possibility to disable it.")
-	set.StringVar(&env.nativeBuilderImage, prefix+"native-builder-image", "", "Force the native builder image.")
+	set.StringVar(&env.customMavenRepoURL, prefix+"custom_maven_repo_url", "", "Set a custom Maven repository url for S2I builds, in case your artifacts are in a specific repository. See https://github.com/kiegroup/kogito-images/README.md for more information")
+	set.BoolVar(&env.customMavenRepoReplaceDefault, prefix+"custom_maven_repo_replace_default", false, "If you specified the option 'tests.custom_maven_repo_url' and you want that one to replace the main JBoss repository (useful with snapshots).")
+	set.StringVar(&env.mavenMirrorURL, prefix+"maven_mirror_url", "", "Maven mirror url to be used when building app in the tests")
+	set.BoolVar(&env.mavenIgnoreSelfSignedCertificate, prefix+"maven_ignore_self_signed_certificate", false, "Set to true if maven build need to ignore self-signed certificate. This could happen when using internal maven mirror url.")
+	set.StringVar(&env.buildBuilderImageTag, prefix+"build_builder_image_tag", "", "Set the S2I build image full tag")
+	set.StringVar(&env.buildRuntimeJVMImageTag, prefix+"build_runtime_jvm_image_tag", "", "Set the Runtime build image full tag")
+	set.StringVar(&env.buildRuntimeNativeImageTag, prefix+"build_runtime_native_image_tag", "", "Set the Runtime build image full tag")
+	set.BoolVar(&env.disableMavenNativeBuildInContainer, prefix+"disable_maven_native_build_container", false, "By default, Maven native builds are done in container (via container engine). Possibility to disable it.")
+	set.StringVar(&env.nativeBuilderImage, prefix+"native_builder_image", "", "Force the native builder image.")
 
 	// examples repository
-	set.StringVar(&env.examplesRepositoryURI, prefix+"examples-uri", defaultKogitoExamplesURI, "Set the URI for the kogito-examples repository")
-	set.StringVar(&env.examplesRepositoryRef, prefix+"examples-ref", "", "Set the branch for the kogito-examples repository")
-	set.BoolVar(&env.examplesRepositoryIgnoreSSL, prefix+"examples-ignore-ssl", false, "Set to true to ignore SSL check when checking out examples repository")
+	set.StringVar(&env.examplesRepositoryURI, prefix+"examples_uri", defaultKogitoExamplesURI, "Set the URI for the kogito-examples repository")
+	set.StringVar(&env.examplesRepositoryRef, prefix+"examples_ref", "", "Set the branch for the kogito-examples repository")
+	set.BoolVar(&env.examplesRepositoryIgnoreSSL, prefix+"examples_ignore_ssl", false, "Set to true to ignore SSL check when checking out examples repository")
 
 	// Infinispan
-	set.StringVar(&env.infinispanInstallationSource, prefix+"infinispan-installation-source", installationSourceOlm, "Infinispan operator installation source")
+	set.StringVar(&env.infinispanInstallationSource, prefix+"infinispan_installation_source", installationSourceOlm, "Infinispan operator installation source")
 
 	// Hyperfoil
-	set.StringVar(&env.hyperfoilOutputDirectory, prefix+"hyperfoil-output-directory", "..", "Defines output directory to store Hyperfoil run statistics. Default is Kogito operator base folder.")
+	set.StringVar(&env.hyperfoilOutputDirectory, prefix+"hyperfoil_output_directory", "..", "Defines output directory to store Hyperfoil run statistics. Default is Kogito operator base folder.")
 
 	// dev options
-	set.BoolVar(&env.showScenarios, prefix+"show-scenarios", false, "Show all scenarios which will be executed.")
-	set.BoolVar(&env.showSteps, prefix+"show-steps", false, "Show all scenarios and their steps which will be executed.")
-	set.BoolVar(&env.dryRun, prefix+"dry-run", false, "Dry Run the tests.")
-	set.BoolVar(&env.keepNamespace, prefix+"keep-namespace", false, "Do not delete namespace(s) after scenario run (WARNING: can be resources consuming ...)")
-	set.StringVar(&env.namespaceName, developmentOptionsPrefix+"namespace-name", "", "Use the specified namespace for scenarios, don't generate random namespace.")
-	set.BoolVar(&env.localCluster, developmentOptionsPrefix+"local-cluster", false, "If tests are launch using a local cluster")
+	set.BoolVar(&env.showScenarios, prefix+"show_scenarios", false, "Show all scenarios which will be executed.")
+	set.BoolVar(&env.showSteps, prefix+"show_steps", false, "Show all scenarios and their steps which will be executed.")
+	set.BoolVar(&env.dryRun, prefix+"dry_run", false, "Dry Run the tests.")
+	set.BoolVar(&env.keepNamespace, prefix+"keep_namespace", false, "Do not delete namespace(s) after scenario run (WARNING: can be resources consuming ...)")
+	set.StringVar(&env.namespaceName, developmentOptionsPrefix+"namespace_name", "", "Use the specified namespace for scenarios, don't generate random namespace.")
+	set.BoolVar(&env.localCluster, developmentOptionsPrefix+"local_cluster", false, "If tests are launch using a local cluster")
 }
 
-func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageMaps *map[ConfigPersistenceType]string, keyPrefix, descriptionPrefix string) {
-	// imageMaps[NoPersistenceType] = ""
-	set.StringVar(&(*imageMaps)[NoPersistenceType]), keyPrefix+"-image-tag", "", "Set the Kogito Data Index image tag for inmemory persistence type")
-	// set.StringVar(&env.dataIndexImageTag, keyPrefix+MongoDB+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
+func addAllPersistenceTypesImageTagFlags(set *flag.FlagSet, imageTags ImageTagsInterface, keyPrefix string) {
+	for imageType, persistenceTypes := range imageTypePersistenceMapping {
+		for _, persistenceType := range persistenceTypes {
+			addPersistenceTypeImageTagFlags(set, imageTags, imageType, persistenceType, keyPrefix)
+		}
+	}
 }
 
-func addPersistenceTypeImageTagFlag(set *flag.FlagSet, ConfigPersisimageMaps *map[ConfigPersistenceType]string, keyPrefix, descriptionPrefix string) {
-	// imageMaps[NoPersistenceType] = ""
-	set.StringVar(&(*imageMaps)[NoPersistenceType]), keyPrefix+"-image-tag", "", "Set the Kogito Data Index image tag for inmemory persistence type")
-	// set.StringVar(&env.dataIndexImageTag, keyPrefix+MongoDB+"data-index-image-tag", "", "Set the Kogito Data Index image tag ('services-image-version' is ignored)")
+func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageTags ImageTagsInterface, imageType ImageType, persistenceType ImagePersistenceType, keyPrefix string) {
+	key := fmt.Sprintf("%s_%s", keyPrefix, imageType)
+	description := fmt.Sprintf("Set the %s image tag", imageType)
+	if len(persistenceType) > 0 {
+		key = fmt.Sprintf("%s_%s", key, persistenceType)
+		description = fmt.Sprintf("%s with %s persistence type", description, persistenceType)
+	}
+	key = fmt.Sprintf("%s_image_tag", key)
+
+	set.StringVar(imageTags.GetImageTagPointerFromPersistenceType(imageType, persistenceType), key, "", description)
 }
 
 // tests configuration
@@ -332,39 +319,8 @@ func GetOperatorCliPath() (string, error) {
 
 // runtime
 
-// GetDataIndexImageTag return the Kogito Data Index image tag
-func GetDataIndexImageTag() string {
-	return env.dataIndexImageTag
-}
-
-// GetExplainabilityImageTag return the Kogito Explainability image tag
-func GetExplainabilityImageTag() string {
-	return env.explainabilityImageTag
-}
-
-// GetJobsServiceImageTag return the Kogito Jobs Service image tag
-func GetJobsServiceImageTag() string {
-	return env.jobsServiceImageTag
-}
-
-// GetManagementConsoleImageTag return the Kogito Management Console image tag
-func GetManagementConsoleImageTag() string {
-	return env.mgmtConsoleImageTag
-}
-
-// GetTaskConsoleImageTag return the Kogito Management Console image tag
-func GetTaskConsoleImageTag() string {
-	return env.taskConsoleImageTag
-}
-
-// GetTrustyImageTag return the Kogito Trusty image tag
-func GetTrustyImageTag() string {
-	return env.trustyImageTag
-}
-
-// GetTrustyUIImageTag return the Kogito Management Console image tag
-func GetTrustyUIImageTag() string {
-	return env.trustyUIImageTag
+func GetServiceImageTag(ImageType ImageType, persistenceType ImagePersistenceType) string {
+	return *env.servicesImageTags.GetImageTagPointerFromPersistenceType(ImageType, persistenceType)
 }
 
 // GetRuntimeApplicationImageRegistry return the registry for the runtime application images
