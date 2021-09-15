@@ -33,22 +33,22 @@ const (
 type ImagePersistenceType string
 
 const (
+	EphemeralPersistenceType  ImagePersistenceType = "ephemeral"
 	InfinispanPersistenceType ImagePersistenceType = "infinispan"
 	MongoDBPersistenceType    ImagePersistenceType = "mongodb"
-	NoPersistenceType         ImagePersistenceType = ""
 	PosgresqlPersistenceType  ImagePersistenceType = "posgresql"
 	RedisPersistenceType      ImagePersistenceType = "redis"
 )
 
 var (
 	imageTypePersistenceMapping map[ImageType][]ImagePersistenceType = map[ImageType][]ImagePersistenceType{
-		DataIndexImageType:         {NoPersistenceType, InfinispanPersistenceType, MongoDBPersistenceType, PosgresqlPersistenceType},
-		ExplainabilityImageType:    {NoPersistenceType},
-		JobServiceImageType:        {NoPersistenceType, InfinispanPersistenceType, MongoDBPersistenceType, PosgresqlPersistenceType},
-		ManagementConsoleImageType: {NoPersistenceType},
-		TaskConsoleImageType:       {NoPersistenceType},
+		DataIndexImageType:         {EphemeralPersistenceType, InfinispanPersistenceType, MongoDBPersistenceType, PosgresqlPersistenceType},
+		ExplainabilityImageType:    {EphemeralPersistenceType},
+		JobServiceImageType:        {EphemeralPersistenceType, InfinispanPersistenceType, MongoDBPersistenceType, PosgresqlPersistenceType},
+		ManagementConsoleImageType: {EphemeralPersistenceType},
+		TaskConsoleImageType:       {EphemeralPersistenceType},
 		TrustyImageType:            {InfinispanPersistenceType, RedisPersistenceType},
-		TrustyUIImageType:          {NoPersistenceType},
+		TrustyUIImageType:          {EphemeralPersistenceType},
 	}
 )
 

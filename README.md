@@ -275,9 +275,9 @@ You can set those optional keys:
 - `cli_path` set the built CLI path.  
   *Default is ./build/_output/bin/kogito*.
 <!--- runtime -->
-- `services_{image_type}(_{persistence_type})_image_tag` sets the services (jobs-service, data-index, ...) image tag. `persistence_type` is optional.
+- `services_{image_type}_{persistence_type}_image_tag` sets the services (jobs-service, data-index, ...) image tag.
   image_type => data-index, explainibility, jobs-service, mgmt-console, task-console, trusty, trusty-ui
-  persistence_type => infinispan, mongodb, postgresql, redis
+  persistence_type => ephemeral, infinispan, mongodb, postgresql, redis
 <!--- build -->
 - `custom_maven_repo_url` sets a custom Maven repository url for S2I builds, in case your artifacts are in a specific repository. See https://github.com/kiegroup/kogito-images/README.md for more information.
 - `maven_mirror_url` is the Maven mirror URL.  

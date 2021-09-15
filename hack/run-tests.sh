@@ -114,7 +114,7 @@ function usage(){
   printf "\n--cli_path {PATH}\n\tPath to built CLI to test. Default is local built one."
 
   # runtime
-  printf "\n--data_index_image_tag {IMAGE_TAG}\n\tSet the Kogito Data Index image tag ('services_image_version' is ignored)"
+  printf "\n--services_{image_type}_{persistence_type}_image_tag {IMAGE_TAG}\n\tSet the services (jobs-service, data-index, ...) image tag.\n\t\timage_type => data-index, explainibility, jobs-service, mgmt-console, task-console, trusty, trusty-ui\n\t\tpersistence_type => ephemeral, infinispan, mongodb, postgresql, redis"
   printf "\n--explainability_image_tag {IMAGE_TAG}\n\tSet the Kogito Explainability image tag ('services-image-version' is ignored)"
   printf "\n--jobs_service_image_tag {IMAGE_TAG}\n\tSet the Kogito Jobs Service image tag ('services_image_version' is ignored)"
   printf "\n--management_console_image_tag {IMAGE_TAG}\n\tSet the Kogito Management Console image tag ('services_image_version' is ignored)"

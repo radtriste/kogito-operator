@@ -43,7 +43,7 @@ func GetKogitoExplainabilityResourceStub(namespace string, replicas int) *v1beta
 		ObjectMeta: NewObjectMetadata(namespace, getExplainabilityServiceName()),
 		Spec: v1beta1.KogitoSupportingServiceSpec{
 			ServiceType:       api.Explainability,
-			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.ExplainabilityImageType, config.NoPersistenceType), kogitosupportingservice.DefaultExplainabilityImageName),
+			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.ExplainabilityImageType, config.EphemeralPersistenceType), kogitosupportingservice.DefaultExplainabilityImageName),
 		},
 	}
 }

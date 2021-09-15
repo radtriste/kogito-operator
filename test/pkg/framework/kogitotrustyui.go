@@ -42,7 +42,7 @@ func GetKogitoTrustyUIResourceStub(namespace string, replicas int) *v1beta1.Kogi
 		ObjectMeta: NewObjectMetadata(namespace, getTrustyUIServiceName()),
 		Spec: v1beta1.KogitoSupportingServiceSpec{
 			ServiceType:       api.TrustyUI,
-			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.TrustyImageType, config.NoPersistenceType), kogitosupportingservice.DefaultTrustyUIImageName),
+			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.TrustyImageType, config.EphemeralPersistenceType), kogitosupportingservice.DefaultTrustyUIImageName),
 		},
 	}
 }

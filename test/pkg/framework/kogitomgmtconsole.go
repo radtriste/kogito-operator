@@ -42,7 +42,7 @@ func GetKogitoManagementConsoleResourceStub(namespace string, replicas int) *v1b
 		ObjectMeta: NewObjectMetadata(namespace, getManagementConsoleServiceName()),
 		Spec: v1beta1.KogitoSupportingServiceSpec{
 			ServiceType:       api.MgmtConsole,
-			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.ManagementConsoleImageType, config.NoPersistenceType), kogitosupportingservice.DefaultMgmtConsoleImageName),
+			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.ManagementConsoleImageType, config.EphemeralPersistenceType), kogitosupportingservice.DefaultMgmtConsoleImageName),
 		},
 	}
 }

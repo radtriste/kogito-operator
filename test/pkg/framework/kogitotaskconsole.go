@@ -42,7 +42,7 @@ func GetKogitoTaskConsoleResourceStub(namespace string, replicas int) *v1beta1.K
 		ObjectMeta: NewObjectMetadata(namespace, getTaskConsoleServiceName()),
 		Spec: v1beta1.KogitoSupportingServiceSpec{
 			ServiceType:       api.TaskConsole,
-			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.TaskConsoleImageType, config.NoPersistenceType), kogitosupportingservice.DefaultTaskConsoleImageName),
+			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.TaskConsoleImageType, config.EphemeralPersistenceType), kogitosupportingservice.DefaultTaskConsoleImageName),
 		},
 	}
 }

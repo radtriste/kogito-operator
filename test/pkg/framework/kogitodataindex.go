@@ -50,7 +50,7 @@ func GetKogitoDataIndexResourceStub(namespace string, replicas int) *v1beta1.Kog
 		ObjectMeta: NewObjectMetadata(namespace, getDataIndexServiceName()),
 		Spec: v1beta1.KogitoSupportingServiceSpec{
 			ServiceType: api.DataIndex,
-			// This should be changed to `nopersistence` once inmemory data-index is available
+			// This should be changed to `ephemeral` once inmemory data-index is available
 			KogitoServiceSpec: NewKogitoServiceSpec(int32(replicas), config.GetServiceImageTag(config.DataIndexImageType, config.InfinispanPersistenceType), kogitosupportingservice.DefaultDataIndexImageName),
 		},
 	}
