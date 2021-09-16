@@ -164,9 +164,8 @@ function addParam(){
     elif [ "$2" = "false" ]; then
       return 0
     fi
-  else
-    PARAMS="${PARAMS} ${1}"
   fi
+  PARAMS="${PARAMS} ${1}"
   return 1
 }
 
@@ -299,7 +298,7 @@ case $1 in
     elif arrayMatchElement ${value} "${STRING_TEST_PARAMS[*]}"; then
       if addParamKeyValueIfAccepted "--tests.${value}" ${1}; then shift; fi
     elif arrayMatchElement ${value} "${DEV_BOOLEAN_TEST_PARAMS[*]}"; then
-      if addParam "--tests.${value}" ${1}; then shift; fi
+      if addParam "--tests.dev.${value}" ${1}; then shift; fi
     elif arrayMatchElement ${value} "${DEV_STRING_TEST_PARAMS[*]}"; then
       if addParamKeyValueIfAccepted "--tests.dev.${value}" ${1}; then shift; fi
     else
