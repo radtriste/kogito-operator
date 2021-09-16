@@ -51,6 +51,9 @@ type TestConfig struct {
 
 	// runtime
 	servicesImageTags                 ImageTags
+	servicesImageRegistry             string
+	servicesImageNameSuffix           string
+	servicesImageVersion              string
 	runtimeApplicationImageRegistry   string
 	runtimeApplicationImageNamePrefix string
 	runtimeApplicationImageNameSuffix string
@@ -147,7 +150,9 @@ func BindFlags(set *flag.FlagSet) {
 
 	// runtime
 	addAllPersistenceTypesImageTagFlags(set, &env.servicesImageTags, prefix+"services")
-
+	set.StringVar(&env.servicesImageRegistry, prefix+"services_image_registry", "", "Set the global services image registry")
+	set.StringVar(&env.servicesImageNameSuffix, prefix+"services_image_name_suffix", "", "Set the global services image name suffix")
+	set.StringVar(&env.servicesImageVersion, prefix+"services_image_version", "", "Set the global services image version")
 	set.StringVar(&env.runtimeApplicationImageRegistry, prefix+"runtime_application_image_registry", "", "Set the runtime application (built Kogito application image) image registry")
 	set.StringVar(&env.runtimeApplicationImageNamePrefix, prefix+"runtime_application_image_name_prefix", "", "Set the runtime application (built Kogito application image) image name prefix")
 	set.StringVar(&env.runtimeApplicationImageNameSuffix, prefix+"runtime_application_image_name_suffix", "", "Set the runtime application (built Kogito application image) image name suffix")
@@ -197,7 +202,7 @@ func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageTags ImageTagsInter
 	description := fmt.Sprintf("Set the %s image tag", imageType)
 	if len(persistenceType) > 0 {
 		key = fmt.Sprintf("%s_%s", key, persistenceType)
-		description = fmt.Sprintf("%s with %s persistence type", description, persistenceType)
+		description = fmt.Sprintf("%s with %s persistence type. This overrides the `services_image_*` parameters.", description, persistenceType)
 	}
 	key = fmt.Sprintf("%s_image_tag", key)
 
@@ -321,6 +326,21 @@ func GetOperatorCliPath() (string, error) {
 
 func GetServiceImageTag(ImageType ImageType, persistenceType ImagePersistenceType) string {
 	return *env.servicesImageTags.GetImageTagPointerFromPersistenceType(ImageType, persistenceType)
+}
+
+// GetServicesImageRegistry return the registry for the services images
+func GetServicesImageRegistry() string {
+	return env.servicesImageRegistry
+}
+
+// GetServicesImageNameSuffix return the name suffix for the services images
+func GetServicesImageNameSuffix() string {
+	return env.servicesImageNameSuffix
+}
+
+// GetServicesImageVersion return the version for the services images
+func GetServicesImageVersion() string {
+	return env.servicesImageVersion
 }
 
 // GetRuntimeApplicationImageRegistry return the registry for the runtime application images

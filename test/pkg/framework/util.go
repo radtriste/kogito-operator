@@ -28,11 +28,11 @@ import (
 	"github.com/kiegroup/kogito-operator/version"
 
 	api "github.com/kiegroup/kogito-operator/apis"
+	"github.com/kiegroup/kogito-operator/core/framework"
 	"github.com/kiegroup/kogito-operator/core/infrastructure"
 	"github.com/kiegroup/kogito-operator/core/kogitobuild"
 	"github.com/kiegroup/kogito-operator/core/test"
 
-	"github.com/kiegroup/kogito-operator/core/framework"
 	"github.com/kiegroup/kogito-operator/test/pkg/config"
 )
 
@@ -252,18 +252,29 @@ func GetKogitoBuildRuntimeImage(native bool) string {
 		}
 		imageName = kogitobuild.GetDefaultRuntimeJVMImage()
 	}
+
 	return ConstructDefaultImageFullTag(imageName)
 }
 
 // ConstructDefaultImageFullTag construct the full image tag (adding default registry and tag)
 func ConstructDefaultImageFullTag(imageName string) string {
-	image := api.Image{
-		Domain: infrastructure.GetDefaultImageRegistry(),
-		Name:   imageName,
-		Tag:    infrastructure.GetKogitoImageVersion(version.Version),
+	image := &api.Image{
+		Name: imageName,
+	}
+	AppendImageDefaultValues(image)
+
+	return framework.ConvertImageToImageTag(*image)
+}
+
+// AppendImageDefaultValues appends the image default values if none existing
+func AppendImageDefaultValues(image *api.Image) {
+	if len(image.Domain) == 0 {
+		image.Domain = infrastructure.GetDefaultImageRegistry()
 	}
 
-	return framework.ConvertImageToImageTag(image)
+	if len(image.Tag) == 0 {
+		image.Tag = infrastructure.GetKogitoImageVersion(version.Version)
+	}
 }
 
 // AddLineToFile adds the given line to the given file

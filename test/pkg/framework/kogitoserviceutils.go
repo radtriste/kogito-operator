@@ -22,6 +22,8 @@ import (
 	api "github.com/kiegroup/kogito-operator/apis"
 
 	"github.com/kiegroup/kogito-operator/core/client/kubernetes"
+	"github.com/kiegroup/kogito-operator/core/framework"
+	"github.com/kiegroup/kogito-operator/test/pkg/config"
 	"github.com/kiegroup/kogito-operator/test/pkg/framework/mappers"
 	bddtypes "github.com/kiegroup/kogito-operator/test/pkg/types"
 	corev1 "k8s.io/api/core/v1"
@@ -114,9 +116,18 @@ func NewImageOrDefault(fullImage string, defaultImageName string) string {
 	if len(fullImage) > 0 {
 		return fullImage
 	}
+	image := &api.Image{
+		Domain: config.GetServicesImageRegistry(),
+		Name:   defaultImageName,
+		Tag:    config.GetServicesImageVersion(),
+	}
+	// Update image name with suffix if provided
+	if len(config.GetServicesImageNameSuffix()) > 0 {
+		image.Name = fmt.Sprintf("%s-%s", image.Name, config.GetServicesImageNameSuffix())
+	}
+	AppendImageDefaultValues(image)
 
-	return ConstructDefaultImageFullTag(defaultImageName)
-
+	return framework.ConvertImageToImageTag(*image)
 }
 
 func crInstall(serviceHolder *bddtypes.KogitoServiceHolder) error {

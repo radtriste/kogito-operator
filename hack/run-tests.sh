@@ -33,7 +33,7 @@ STRING_TEST_PARAMS+=(operator_profiling_data_access_yaml_uri operator_profiling_
 STRING_TEST_PARAMS+=(operator_yaml_uri cli_path)
 
 # runtime
-STRING_TEST_PARAMS+=(services_.+_image_tag runtime_application_image_registry runtime_application_image_name_prefix runtime_application_image_name_suffix runtime_application_image_version)
+STRING_TEST_PARAMS+=(services_.+_image_tag services_image_registry services_image_name_suffix services_image_version runtime_application_image_registry runtime_application_image_name_prefix runtime_application_image_name_suffix runtime_application_image_version)
 
 # build
 BOOLEAN_TEST_PARAMS+=(custom_maven_repo_replace_default maven_ignore_self_signed_certificate disable_maven_native_build_container)
@@ -115,12 +115,9 @@ function usage(){
 
   # runtime
   printf "\n--services_{image_type}_{persistence_type}_image_tag {IMAGE_TAG}\n\tSet the services (jobs-service, data-index, ...) image tag.\n\t\timage_type => data-index, explainibility, jobs-service, mgmt-console, task-console, trusty, trusty-ui\n\t\tpersistence_type => ephemeral, infinispan, mongodb, postgresql, redis"
-  printf "\n--explainability_image_tag {IMAGE_TAG}\n\tSet the Kogito Explainability image tag ('services-image-version' is ignored)"
-  printf "\n--jobs_service_image_tag {IMAGE_TAG}\n\tSet the Kogito Jobs Service image tag ('services_image_version' is ignored)"
-  printf "\n--management_console_image_tag {IMAGE_TAG}\n\tSet the Kogito Management Console image tag ('services_image_version' is ignored)"
-  printf "\n--task_console_image_tag {IMAGE_TAG}\n\tSet the Kogito Task Console image tag ('services-image-version' is ignored)"
-  printf "\n--trusty_image_tag {IMAGE_TAG}\n\tSet the Kogito Trusty image tag ('services_image_version' is ignored)"
-  printf "\n--trusty_ui_image_tag {IMAGE_TAG}\n\tSet the Kogito Trusty UI image tag ('services_image_version' is ignored)"
+  printf "\n--services_image_registry {REGISTRY}\n\tSet the global services image registry."
+  printf "\n--services_image_name_suffix {NAMESPACE}\n\tSet the global services image name suffix to append to usual image names."
+  printf "\n--services_image_version {VERSION}\n\tSet the global services image version."
   printf "\n--runtime_application_image_registry {REGISTRY}\n\tSet the registry for built runtime applications."
   printf "\n--runtime_application_image_name_prefix {NAME_PREFIX}\n\tSet the image name suffix to prepend to usual image names for built runtime applications."
   printf "\n--runtime_application_image_name_suffix {NAME_SUFFIX}\n\tSet the image name suffix to append to usual image names for built runtime applications."
@@ -275,6 +272,7 @@ case $1 in
   --dry_run)
     addParam "--tests.show_scenarios"
     addParam "--tests.dry_run"
+    shift
   ;;
   --keep_namespace)
     KEEP_NAMESPACE=true
