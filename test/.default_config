@@ -6,4 +6,4 @@ tests.services_image_version=latest
 tests.runtime_application_image_name_prefix=examples
 tests.runtime_application_image_name_suffix=nightly
 tests.runtime_application_image_version=latest
-tests.examples_ref=nightly_main
+tests.examples_ref=nightly-main
