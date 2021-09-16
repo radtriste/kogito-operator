@@ -14,30 +14,40 @@
 
 package config
 
-type ImageTagsInterface interface {
-	GetImageTagPointerFromPersistenceType(imageType ImageType, persistenceType ImagePersistenceType) *string
-}
-
+// ImageType represents the image base image name
 type ImageType string
 
 const (
-	DataIndexImageType         ImageType = "data-index"
-	ExplainabilityImageType    ImageType = "explainability"
-	JobServiceImageType        ImageType = "jobs-service"
+	// DataIndexImageType ...
+	DataIndexImageType ImageType = "data-index"
+	// ExplainabilityImageType ...
+	ExplainabilityImageType ImageType = "explainability"
+	// JobServiceImageType ...
+	JobServiceImageType ImageType = "jobs-service"
+	// ManagementConsoleImageType ...
 	ManagementConsoleImageType ImageType = "mgmt-console"
-	TaskConsoleImageType       ImageType = "task-console"
-	TrustyImageType            ImageType = "trusty"
-	TrustyUIImageType          ImageType = "trusty-ui"
+	// TaskConsoleImageType ...
+	TaskConsoleImageType ImageType = "task-console"
+	// TrustyImageType ...
+	TrustyImageType ImageType = "trusty"
+	// TrustyUIImageType ...
+	TrustyUIImageType ImageType = "trusty-ui"
 )
 
+// ImagePersistenceType represents the persistence type for the base image
 type ImagePersistenceType string
 
 const (
-	EphemeralPersistenceType  ImagePersistenceType = "ephemeral"
+	// EphemeralPersistenceType ...
+	EphemeralPersistenceType ImagePersistenceType = "ephemeral"
+	// InfinispanPersistenceType ...
 	InfinispanPersistenceType ImagePersistenceType = "infinispan"
-	MongoDBPersistenceType    ImagePersistenceType = "mongodb"
-	PosgresqlPersistenceType  ImagePersistenceType = "posgresql"
-	RedisPersistenceType      ImagePersistenceType = "redis"
+	// MongoDBPersistenceType ...
+	MongoDBPersistenceType ImagePersistenceType = "mongodb"
+	// PosgresqlPersistenceType ...
+	PosgresqlPersistenceType ImagePersistenceType = "posgresql"
+	// RedisPersistenceType ...
+	RedisPersistenceType ImagePersistenceType = "redis"
 )
 
 var (
@@ -52,18 +62,18 @@ var (
 	}
 )
 
-type ImageTags struct {
+type imageTags struct {
 	tags map[ImageType]map[ImagePersistenceType]*string
 }
 
-func (imageTags *ImageTags) GetImageTagPointerFromPersistenceType(imageType ImageType, persistenceType ImagePersistenceType) *string {
-	if len(imageTags.tags[imageType]) <= 0 {
-		imageTags.tags[imageType] = make(map[ImagePersistenceType]*string)
+func (imgTags *imageTags) GetImageTagPointerFromPersistenceType(imageType ImageType, persistenceType ImagePersistenceType) *string {
+	if len(imgTags.tags[imageType]) <= 0 {
+		imgTags.tags[imageType] = make(map[ImagePersistenceType]*string)
 	}
-	if imageTags.tags[imageType][persistenceType] == nil {
+	if imgTags.tags[imageType][persistenceType] == nil {
 		tag := ""
-		imageTags.tags[imageType][persistenceType] = &tag
+		imgTags.tags[imageType][persistenceType] = &tag
 	}
 
-	return imageTags.tags[imageType][persistenceType]
+	return imgTags.tags[imageType][persistenceType]
 }

@@ -15,9 +15,11 @@
 package config
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/kiegroup/kogito-operator/version"
 	flag "github.com/spf13/pflag"
-	"path/filepath"
 )
 
 // TestConfig contains the information about the tests environment
@@ -189,7 +191,7 @@ func BindFlags(set *flag.FlagSet) {
 	set.BoolVar(&env.localCluster, developmentOptionsPrefix+"local_cluster", false, "If tests are launch using a local cluster")
 }
 
-func addAllPersistenceTypesImageTagFlags(set *flag.FlagSet, imageTags ImageTagsInterface, keyPrefix string) {
+func addAllPersistenceTypesImageTagFlags(set *flag.FlagSet, imageTags *imageTags, keyPrefix string) {
 	for imageType, persistenceTypes := range imageTypePersistenceMapping {
 		for _, persistenceType := range persistenceTypes {
 			addPersistenceTypeImageTagFlags(set, imageTags, imageType, persistenceType, keyPrefix)
@@ -197,7 +199,7 @@ func addAllPersistenceTypesImageTagFlags(set *flag.FlagSet, imageTags ImageTagsI
 	}
 }
 
-func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageTags ImageTagsInterface, imageType ImageType, persistenceType ImagePersistenceType, keyPrefix string) {
+func addPersistenceTypeImageTagFlags(set *flag.FlagSet, imageTags *imageTags, imageType ImageType, persistenceType ImagePersistenceType, keyPrefix string) {
 	key := fmt.Sprintf("%s_%s", keyPrefix, imageType)
 	description := fmt.Sprintf("Set the %s image tag", imageType)
 	if len(persistenceType) > 0 {
@@ -324,6 +326,7 @@ func GetOperatorCliPath() (string, error) {
 
 // runtime
 
+// GetServiceImageTag returns the image tag based on the image type and the persistence type
 func GetServiceImageTag(ImageType ImageType, persistenceType ImagePersistenceType) string {
 	return *env.servicesImageTags.GetImageTagPointerFromPersistenceType(ImageType, persistenceType)
 }
