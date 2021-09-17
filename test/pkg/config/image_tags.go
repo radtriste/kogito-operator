@@ -67,6 +67,9 @@ type imageTags struct {
 }
 
 func (imgTags *imageTags) GetImageTagPointerFromPersistenceType(imageType ImageType, persistenceType ImagePersistenceType) *string {
+	if len(imgTags.tags) <= 0 {
+		imgTags.tags = make(map[ImageType]map[ImagePersistenceType]*string)
+	}
 	if len(imgTags.tags[imageType]) <= 0 {
 		imgTags.tags[imageType] = make(map[ImagePersistenceType]*string)
 	}
