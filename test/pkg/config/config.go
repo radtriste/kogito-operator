@@ -52,7 +52,7 @@ type TestConfig struct {
 	cliPath         string
 
 	// runtime
-	servicesImageTags                 ImageTags
+	servicesImageTags                 imageTags
 	servicesImageRegistry             string
 	servicesImageNameSuffix           string
 	servicesImageVersion              string
