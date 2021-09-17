@@ -340,13 +340,13 @@ Map getBDDCommonParameters(boolean runtime_app_registry_internal) {
     if (mavenRepository) {
         // No mirror if we set directly the Maven repository
         // Tests will be slower but we need to test against specific artifacts
-        testParamsMap['custom_maven_repo'] = mavenRepository
+        testParamsMap['custom_maven_repo_url'] = mavenRepository
         testParamsMap['maven_ignore_self_signed_certificate'] = true
     }
     // Disabled as we now use IBMCloud
     // Follow-up issue to make it more dynamic: https://issues.redhat.com/browse/KOGITO-5739
     // if (env.MAVEN_MIRROR_REPOSITORY) {
-    //     testParamsMap['maven_mirror'] = env.MAVEN_MIRROR_REPOSITORY
+    //     testParamsMap['maven_mirror_url'] = env.MAVEN_MIRROR_REPOSITORY
     //     testParamsMap['maven_ignore_self_signed_certificate'] = true
     // }
 

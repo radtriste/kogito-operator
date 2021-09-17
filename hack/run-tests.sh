@@ -259,29 +259,77 @@ case $1 in
     fi
   ;;
   --debug)
-    DEBUG=true
     shift
+    if [ ! -z $1 ]; then 
+      if [ "$1" = "true" ]; then
+        DEBUG=true
+        shift
+      elif [ "$1" = "false" ]; then
+        shift
+      fi
+    else
+      DEBUG=true
+    fi
   ;;
   --load_default_config)
-    LOAD_DEFAULT_CONFIG=true
     shift
+    if [ ! -z $1 ]; then 
+      if [ "$1" = "true" ]; then
+        LOAD_DEFAULT_CONFIG=true
+        shift
+      elif [ "$1" = "false" ]; then
+        shift
+      fi
+    else
+      LOAD_DEFAULT_CONFIG=true
+    fi
   ;;
 
   # dev options
   --dry_run)
-    addParam "--tests.show_scenarios"
-    addParam "--tests.dry_run"
     shift
+    if [ ! -z $1 ]; then 
+      if [ "$1" = "true" ]; then
+        addParam "--tests.show_scenarios"
+        addParam "--tests.dry_run"
+        shift
+      elif [ "$1" = "false" ]; then
+        shift
+      fi
+    else
+      addParam "--tests.show_scenarios"
+      addParam "--tests.dry_run"
+    fi
   ;;
   --keep_namespace)
-    KEEP_NAMESPACE=true
-    DISABLE_CLEAN_CLUSTER=true
-    addParam "--tests.keep_namespace"
     shift
+    if [ ! -z $1 ]; then 
+      if [ "$1" = "true" ]; then
+        KEEP_NAMESPACE=true
+        DISABLE_CLEAN_CLUSTER=true
+        addParam "--tests.keep_namespace"
+        shift
+      elif [ "$1" = "false" ]; then
+        shift
+      fi
+    else
+      KEEP_NAMESPACE=true
+      DISABLE_CLEAN_CLUSTER=true
+      addParam "--tests.keep_namespace"
+    fi
   ;;
   --disable_clean_cluster)
-    DISABLE_CLEAN_CLUSTER=true
     shift
+    if [ ! -z $1 ]; then 
+      if [ "$1" = "true" ]; then
+        DISABLE_CLEAN_CLUSTER=true
+        shift
+      elif [ "$1" = "false" ]; then
+        shift
+      fi
+    else
+      DISABLE_CLEAN_CLUSTER=true
+    fi
   ;;
 
   # others

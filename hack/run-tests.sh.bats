@@ -17,6 +17,18 @@ export -f oc
     [[ "${output}" =~ "--tests.dry_run" ]]
 }
 
+@test "invoke run-tests with dry_run true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --dry_run true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.dry_run" ]]
+}
+
+@test "invoke run-tests with dry_run false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --dry_run false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.dry_run"* ]]
+}
+
 @test "invoke run-tests unknown option" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh something
     [ "$status" -eq 1 ]
@@ -125,7 +137,18 @@ export -f oc
     run ${BATS_TEST_DIRNAME}/run-tests.sh --debug
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "DEBUG=true go test"* ]]
+}
 
+@test "invoke run-tests with debug true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --debug true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "DEBUG=true go test"* ]]
+}
+
+@test "invoke run-tests with debug false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --debug false
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "DEBUG=false go test"* ]]
 }
 
 @test "invoke run-tests without debug" {
@@ -140,6 +163,18 @@ export -f oc
     [[ "${output}" =~ "--tests.smoke" ]]
 }
 
+@test "invoke run-tests with smoke true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --smoke true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.smoke" ]]
+}
+
+@test "invoke run-tests with smoke false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --smoke false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.smoke"* ]]
+}
+
 @test "invoke run-tests without smoke" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh
     [ "$status" -eq 0 ]
@@ -150,6 +185,18 @@ export -f oc
     run ${BATS_TEST_DIRNAME}/run-tests.sh --performance
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "--tests.performance" ]]
+}
+
+@test "invoke run-tests with performance true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --performance true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.performance" ]]
+}
+
+@test "invoke run-tests with performance false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --performance false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.performance"* ]]
 }
 
 @test "invoke run-tests without performance" {
@@ -212,6 +259,18 @@ export -f oc
     [[ "${output}" =~ "--tests.cr_deployment_only" ]]
 }
 
+@test "invoke run-tests with cr_deployment_only true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --cr_deployment_only true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.cr_deployment_only" ]]
+}
+
+@test "invoke run-tests with cr_deployment_only false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --cr_deployment_only false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.cr_deployment_only"* ]]
+}
+
 @test "invoke run-tests without cr_deployment_only" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh
     [ "$status" -eq 0 ]
@@ -222,6 +281,18 @@ export -f oc
     run ${BATS_TEST_DIRNAME}/run-tests.sh --load_default_config
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "Load default test config" ]]
+}
+
+@test "invoke run-tests with load_default_config true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --load_default_config true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "Load default test config" ]]
+}
+
+@test "invoke run-tests with load_default_config false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh  --load_default_config false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"Load default test config"* ]]
 }
 
 @test "invoke run-tests without load_default_config" {
@@ -346,6 +417,18 @@ export -f oc
     [[ "${output}" =~ "--tests.operator_namespaced" ]]
 }
 
+@test "invoke run-tests with operator_namespaced true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --operator_namespaced true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.operator_namespaced" ]]
+}
+
+@test "invoke run-tests with operator_namespaced false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --operator_namespaced false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.operator_namespaced"* ]]
+}
+
 @test "invoke run-tests without operator_namespaced" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh
     [ "$status" -eq 0 ]
@@ -394,6 +477,18 @@ export -f oc
     run ${BATS_TEST_DIRNAME}/run-tests.sh --operator_profiling_enabled
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "--tests.operator_profiling_enabled" ]]
+}
+
+@test "invoke run-tests with operator_profiling_enabled true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --operator_profiling_enabled true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.operator_profiling_enabled" ]]
+}
+
+@test "invoke run-tests with operator_profiling_enabled false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --operator_profiling_enabled false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.operator_profiling_enabled"* ]]
 }
 
 @test "invoke run-tests without operator_profiling_enabled" {
@@ -684,6 +779,18 @@ export -f oc
     [[ "${output}" =~ "--tests.maven_ignore_self_signed_certificate" ]]
 }
 
+@test "invoke run-tests with maven_ignore_self_signed_certificate true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --maven_ignore_self_signed_certificate true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.maven_ignore_self_signed_certificate" ]]
+}
+
+@test "invoke run-tests with maven_ignore_self_signed_certificate false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --maven_ignore_self_signed_certificate false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.maven_ignore_self_signed_certificate"* ]]
+}
+
 @test "invoke run-tests without maven_ignore_self_signed_certificate" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh
     [ "$status" -eq 0 ]
@@ -860,10 +967,34 @@ export -f oc
     [[ "${output}" =~ "--tests.show_scenarios" ]]
 }
 
+@test "invoke run-tests with show_scenarios true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --show_scenarios true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.show_scenarios" ]]
+}
+
+@test "invoke run-tests with show_scenarios false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --show_scenarios false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.show_scenarios"* ]]
+}
+
 @test "invoke run-tests with keep_namespace" {
     run ${BATS_TEST_DIRNAME}/run-tests.sh --keep_namespace
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "--tests.keep_namespace" ]]
+}
+
+@test "invoke run-tests with keep_namespace true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --keep_namespace true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.keep_namespace" ]]
+}
+
+@test "invoke run-tests with keep_namespace false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --keep_namespace false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.keep_namespace"* ]]
 }
 
 @test "invoke run-tests without keep_namespace" {
@@ -888,6 +1019,18 @@ export -f oc
     run ${BATS_TEST_DIRNAME}/run-tests.sh --local_cluster
     [ "$status" -eq 0 ]
     [[ "${output}" =~ "--tests.dev.local_cluster" ]]
+}
+
+@test "invoke run-tests with local_cluster true" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --local_cluster true
+    [ "$status" -eq 0 ]
+    [[ "${output}" =~ "--tests.dev.local_cluster" ]]
+}
+
+@test "invoke run-tests with local_cluster false" {
+    run ${BATS_TEST_DIRNAME}/run-tests.sh --local_cluster false
+    [ "$status" -eq 0 ]
+    [[ "${output}" != *"--tests.dev.local_cluster"* ]]
 }
 
 @test "invoke run-tests without local_cluster" {
