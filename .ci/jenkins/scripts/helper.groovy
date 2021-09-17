@@ -334,8 +334,7 @@ Map getBDDCommonParameters(boolean runtime_app_registry_internal) {
     testParamsMap['load_default_config'] = true
     testParamsMap['ci'] = 'jenkins'
 
-    testParamsMap['operator_image_tag'] = getTempOpenshiftImageName(true)
-    testParamsMap['operator_tag'] = getTempTag()
+    testParamsMap['operator_image_tag'] = "${getTempOpenshiftImageName(true)}:${getTempTag()}"
 
     String mavenRepository = env.MAVEN_ARTIFACT_REPOSITORY ?: (isRelease() ? env.DEFAULT_STAGING_REPOSITORY : '')
     if (mavenRepository) {
@@ -370,9 +369,13 @@ Map getBDDCommonParameters(boolean runtime_app_registry_internal) {
 Map getBDDBuildImageParameters(String paramsPrefix = defaultImageParamsPrefix) {
     Map testParamsMap = [:]
 
-    testParamsMap['build_image_registry'] = "${getImageRegistry(paramsPrefix)}/${getImageNamespace(paramsPrefix)}"
-    testParamsMap['build_image_name_suffix'] = getImageNameSuffix(paramsPrefix) ?: ''
-    testParamsMap['build_image_version'] = getImageTag(paramsPrefix) ?: ''
+    String registry = "${getImageRegistry(paramsPrefix)}/${getImageNamespace(paramsPrefix)}"
+    String nameSuffix = getImageNameSuffix(paramsPrefix) ? "-${getImageNameSuffix(paramsPrefix)}" : ''
+    String tag = getImageTag(paramsPrefix) ? ":${getImageTag(paramsPrefix)}" : ''
+
+    testParamsMap['build_builder_image_tag'] = "${registry}/kogito-builder${nameSuffix}${tag}"
+    testParamsMap['build_runtime_jvm_image_tag'] = "${registry}/kogito-runtime-jvm${nameSuffix}${tag}"
+    testParamsMap['build_runtime_native_image_tag'] = "${registry}/kogito-runtime-native${nameSuffix}${tag}"
 
     return testParamsMap
 }

@@ -3,6 +3,7 @@ tests.build_runtime_jvm_image_tag=quay.io/kiegroup/kogito-runtime-jvm-nightly:la
 tests.build_runtime_native_image_tag=quay.io/kiegroup/kogito-runtime-native-nightly:latest
 tests.services_image_name_suffix=nightly
 tests.services_image_version=latest
+tests.runtime_application_image_registry=quay.io/kiegroup
 tests.runtime_application_image_name_prefix=examples
 tests.runtime_application_image_name_suffix=nightly
 tests.runtime_application_image_version=latest
