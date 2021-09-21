@@ -5,7 +5,12 @@ def changeBranch = env.ghprbSourceBranch ?: CHANGE_BRANCH
 def changeTarget = env.ghprbTargetBranch ?: CHANGE_TARGET
 
 pipeline {
-    agent { label 'operator-slave' }
+    agent { 
+        label 'kogito-operator-node' 
+    }
+    tools {
+        go 'golang-1.14'
+    }
     options {
         buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')
         timeout(time: 90, unit: 'MINUTES')
