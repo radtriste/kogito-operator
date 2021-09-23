@@ -27,6 +27,23 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
+                    sh '''
+                        cd ~ && pwd
+                        echo 'export PATH=$GOROOT/bin:$PATH' >> /home/jenkins/.bashrc
+                        echo 'export GOPATH=$(go env GOPATH)' >> /home/jenkins/.bashrc
+                        echo 'export PATH=$GOPATH/bin:$PATH' >> /home/jenkins/.bashrc
+                    '''
+                    sh '''
+                        echo "GOROOT=$GOROOT"
+                        echo "GOPATH=$GOPATH"
+                    '''
+                    sh '''
+                        source ~/.bashrc
+                        echo "GOROOT=$GOROOT"
+                        echo "GOPATH=$GOPATH"
+                    '''
+                    sh 'go version'
+
                     sh ' git config --global user.email "jenkins@kie.com" '
                     sh ' git config --global user.name "kie user"'
                     githubscm.checkoutIfExists('kogito-operator', changeAuthor, changeBranch, 'kiegroup', changeTarget, true, ['token' : 'GITHUB_TOKEN', 'usernamePassword' : 'user-kie-ci10'])
@@ -35,10 +52,6 @@ pipeline {
                         usermod --add-subuids 10000-75535 \$(whoami)
                         usermod --add-subgids 10000-75535 \$(whoami)
                     """
-
-                    sh 'echo "GOROOT=$GOROOT"'
-                    sh 'echo "GOPATH=$GOPATH"'
-                    sh 'go version'
                 }
             }
         }
