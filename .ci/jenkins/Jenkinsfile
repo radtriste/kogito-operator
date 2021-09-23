@@ -35,6 +35,10 @@ pipeline {
                         usermod --add-subuids 10000-75535 \$(whoami)
                         usermod --add-subgids 10000-75535 \$(whoami)
                     """
+
+                    sh 'echo "GOROOT=$GOROOT"'
+                    sh 'echo "GOPATH=$GOPATH"'
+                    sh 'go version'
                 }
             }
         }
