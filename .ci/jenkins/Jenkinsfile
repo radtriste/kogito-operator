@@ -18,8 +18,7 @@ pipeline {
     environment {
         OPENSHIFT_INTERNAL_REGISTRY = 'image-registry.openshift-image-registry.svc:5000'
 
-        // Use buildah container engine in this pipeline
-        CONTAINER_ENGINE = 'podman'
+        CONTAINER_ENGINE = 'docker'
 
         CODECOV_TOKEN = credentials('KOGITO_OPERATOR_CODECOV_TOKEN')
     }
@@ -27,22 +26,7 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    sh '''
-                        cd ~ && pwd
-                        echo 'export PATH=$GOROOT/bin:$PATH' >> /home/jenkins/.bashrc
-                        echo 'export GOPATH=$(go env GOPATH)' >> /home/jenkins/.bashrc
-                        echo 'export PATH=$GOPATH/bin:$PATH' >> /home/jenkins/.bashrc
-                    '''
-                    sh '''
-                        echo "GOROOT=$GOROOT"
-                        echo "GOPATH=$GOPATH"
-                    '''
-                    sh '''
-                        source ~/.bashrc
-                        echo "GOROOT=$GOROOT"
-                        echo "GOPATH=$GOPATH"
-                    '''
-                    sh 'go version'
+                    sh 'sed -i \'s|,metacopy=on||g\' /etc/containers/storage.conf'
 
                     sh ' git config --global user.email "jenkins@kie.com" '
                     sh ' git config --global user.name "kie user"'
