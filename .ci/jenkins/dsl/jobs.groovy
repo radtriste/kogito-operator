@@ -39,8 +39,6 @@ void setupProfilingJob() {
     jobParams.triggers = [ cron : '@midnight' ]
     jobParams.env.putAll([
         JENKINS_EMAIL_CREDS_ID: "${JENKINS_EMAIL_CREDS_ID}",
-
-        REPO_NAME: 'kogito-operator',
         OPERATOR_IMAGE_NAME: 'kogito-operator-profiling',
         CONTAINER_ENGINE: 'docker',
         CONTAINER_TLS_OPTIONS: '',
@@ -68,8 +66,6 @@ void setupDeployJob(Folder jobFolder) {
     }
     jobParams.env.putAll([
         JENKINS_EMAIL_CREDS_ID: "${JENKINS_EMAIL_CREDS_ID}",
-
-        REPO_NAME: 'kogito-operator',
         OPERATOR_IMAGE_NAME: 'kogito-operator',
         CONTAINER_ENGINE: 'docker',
         CONTAINER_TLS_OPTIONS: '',
@@ -154,8 +150,6 @@ void setupPromoteJob(Folder jobFolder) {
     def jobParams = KogitoJobUtils.getBasicJobParams(this, 'kogito-operator-promote', jobFolder, "${jenkins_path}/Jenkinsfile.promote", 'Kogito Cloud Operator Promote')
     jobParams.env.putAll([
         JENKINS_EMAIL_CREDS_ID: "${JENKINS_EMAIL_CREDS_ID}",
-
-        REPO_NAME: 'kogito-operator',
         CONTAINER_ENGINE: 'podman',
         CONTAINER_TLS_OPTIONS: '--tls-verify=false',
         MAX_REGISTRY_RETRIES: 3,
@@ -215,8 +209,6 @@ void setupExamplesImagesDeployJob(Folder jobFolder) {
     }
     jobParams.env.putAll([
         JENKINS_EMAIL_CREDS_ID: "${JENKINS_EMAIL_CREDS_ID}",
-
-        REPO_NAME: 'kogito-operator',
         CONTAINER_ENGINE: 'docker',
         CONTAINER_TLS_OPTIONS: '',
         MAX_REGISTRY_RETRIES: 3,
@@ -281,8 +273,6 @@ void setupExamplesImagesPromoteJob(Folder jobFolder) {
     def jobParams = KogitoJobUtils.getBasicJobParams(this, 'kogito-examples-images-promote', jobFolder, "${jenkins_path}/Jenkinsfile.examples-images.promote", 'Kogito Examples Images Promote')
     jobParams.env.putAll([
         JENKINS_EMAIL_CREDS_ID: "${JENKINS_EMAIL_CREDS_ID}",
-
-        REPO_NAME: 'kogito-operator',
         CONTAINER_ENGINE: 'podman',
         CONTAINER_TLS_OPTIONS: '--tls-verify=false',
         MAX_REGISTRY_RETRIES: 3,
