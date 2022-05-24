@@ -266,6 +266,14 @@ boolean isRelease() {
     return env.RELEASE && env.RELEASE.toBoolean()
 }
 
+boolean isNative() {
+    return env.NATIVE ? env.NATIVE.toBoolean() : false
+}
+
+String getNativeBuilderImage() {
+    return env.NATIVE_BUILDER_IMAGE
+}
+
 boolean isCreatePr() {
     return params.CREATE_PR
 }
